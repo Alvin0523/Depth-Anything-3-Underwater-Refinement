@@ -17,6 +17,58 @@
 
 </div>
 
+---
+
+## 🌊 COMP4471 Project — Underwater Fine-Tuning (HKUST)
+
+> **This is a fork of the original DA3 repo.** We are fine-tuning DA3 Mono Metric Large for underwater depth estimation using LoRA, as part of our COMP4471 course project on Autonomous Underwater Vehicles (AUVs).
+
+**Team:** Dana Yak · Shao Ying Zhan · Wong Wei Ming
+
+### What we are doing
+DA3 was trained on terrestrial data and performs poorly underwater due to the domain gap — wavelength-dependent light attenuation causes a strong blue-green colour cast, and backscatter degrades contrast. We are adapting DA3 to the underwater domain via:
+
+- **LoRA fine-tuning** of the DINOv2 backbone (rank=8, ~1% trainable params)
+- **Synthetic training data** generated from a Unity AUV simulation environment (paired RGB + metric depth)
+- **Physics-aware preprocessing** — Gray World white balance + histogram stretching applied at both train and inference time
+- **Combined loss** — SILog + Sobel gradient loss
+
+The fine-tuned model feeds into a full target localisation pipeline: YOLOv26-seg instance masks + DA3 depth map → median depth per object → distance estimate published over ROS 2.
+
+### Project guide and TODO list
+See [`comp4471.md`](comp4471.md) for:
+- Full project plan and status
+- Explanation of every file in `train/`
+- Step-by-step instructions for Unity data export, NSCC training, and benchmarking
+- Per-person TODO task list
+- NSCC environment setup and job script
+
+### Fine-tuning code
+All training code lives in [`train/`](train/):
+
+| File | Purpose |
+|------|---------|
+| `train/lora.py` | LoRA injection into DINOv2 attention blocks |
+| `train/losses.py` | SILog + Sobel gradient loss |
+| `train/dataset.py` | Unity RGB+depth dataset loader with preprocessing |
+| `train/train.py` | Main training script |
+| `train/evaluate.py` | Benchmarking (AbsRel, RMSE, δ<1.25) |
+| `train/test_lora_pipeline.py` | Smoke test — run on NSCC first to verify env |
+
+**Quick start (NSCC env check — no data needed):**
+```bash
+pip install -e .
+python train/test_lora_pipeline.py
+# Expected: ALL CHECKS PASSED
+```
+
+**Train (once Unity data is ready):**
+```bash
+python train/train.py --data_root data/unity --epochs 30 --batch_size 4
+```
+
+---
+
 This work presents **Depth Anything 3 (DA3)**, a model that predicts spatially consistent geometry from
 arbitrary visual inputs, with or without known camera poses.
 In pursuit of minimal modeling, DA3 yields two key insights:
