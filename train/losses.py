@@ -11,11 +11,17 @@ import torch.nn.functional as F
 
 
 class SILogLoss(nn.Module):
-    """Scale-Invariant Log loss (Eigen et al., 2014)."""
+    """Scale-Invariant Log loss (Eigen et al., 2014).
 
-    def __init__(self, variance_focus: float = 0.85):
+    scale_weight: weight for the mean log-ratio term that anchors absolute
+    scale.  Without this the variance-focus term cancels global offset and
+    AbsRel can diverge while SILog stays low.
+    """
+
+    def __init__(self, variance_focus: float = 0.85, scale_weight: float = 0.1):
         super().__init__()
         self.variance_focus = variance_focus
+        self.scale_weight = scale_weight
 
     def forward(self, pred: torch.Tensor, gt: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
         if mask is None:
@@ -25,7 +31,9 @@ class SILogLoss(nn.Module):
         gt_masked = gt[mask].clamp(min=1e-4)
 
         g = torch.log(pred_masked) - torch.log(gt_masked)
-        loss = g.pow(2).mean() - self.variance_focus * g.mean().pow(2)
+        # shape term (scale-invariant) + scale anchor (prevents AbsRel drift)
+        loss = g.pow(2).mean() - self.variance_focus * g.mean().pow(2) \
+               + self.scale_weight * g.mean().abs()
         return loss
 
 
@@ -61,9 +69,10 @@ class GradientLoss(nn.Module):
 class UnderwaterDepthLoss(nn.Module):
     """Combined SILog + gradient loss."""
 
-    def __init__(self, grad_weight: float = 0.5, variance_focus: float = 0.85):
+    def __init__(self, grad_weight: float = 0.5, variance_focus: float = 0.85,
+                 scale_weight: float = 0.1):
         super().__init__()
-        self.silog = SILogLoss(variance_focus=variance_focus)
+        self.silog = SILogLoss(variance_focus=variance_focus, scale_weight=scale_weight)
         self.grad = GradientLoss()
         self.grad_weight = grad_weight
 

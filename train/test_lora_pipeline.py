@@ -103,7 +103,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
     ckpt_path = os.path.join(tmpdir, "test.pth")
     torch.save({"model": da3.state_dict(), "epoch": 1}, ckpt_path)
 
-    da3_reload = DepthAnything3.from_pretrained("depth-anything/da3metric-large").to(DEVICE)
+    da3_reload = DepthAnything3.from_pretrained("depth-anything/da3metric-large", local_files_only=True).to(DEVICE)
     inject_lora(da3_reload.model, rank=8, alpha=16.0)
     ckpt = torch.load(ckpt_path, map_location=DEVICE)
     da3_reload.load_state_dict(ckpt["model"], strict=False)

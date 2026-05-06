@@ -110,7 +110,10 @@ class UnityDepthDataset(Dataset):
 
     def _load_depth(self, path: Path) -> np.ndarray:
         if path.suffix == ".npy":
-            depth = np.load(path).astype(np.float32)
+            stored = np.load(path).astype(np.float32)
+            # MIMIR-UW stores inverse depth (1/metres) for compression.
+            # Zeros in the stored array represent invalid/infinite distance.
+            depth = np.where(stored > 0, 1.0 / stored, 0.0)
         else:
             # uint16 PNG: assume millimetres stored as uint16
             depth_raw = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
@@ -131,7 +134,8 @@ class UnityDepthDataset(Dataset):
         img = cv2.resize(img, (W, H), interpolation=cv2.INTER_LINEAR)
         depth = cv2.resize(depth, (W, H), interpolation=cv2.INTER_NEAREST)
 
-        depth = np.clip(depth, 0.0, self.max_depth)
+        # Zero out background pixels beyond max_depth (they are invalid, not at max_depth m)
+        depth = np.where((depth > 0) & (depth <= self.max_depth), depth, 0.0)
 
         # ImageNet normalise then to CHW tensor
         img = (img - self.IMAGENET_MEAN) / self.IMAGENET_STD
