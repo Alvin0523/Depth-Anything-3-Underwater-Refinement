@@ -23,15 +23,14 @@
     to underwater robotics requires adaptation to the underwater domain, where
     wavelength-dependent light attenuation causes chromatic aberration and
     backscatter reduces contrast. This work employs Low-Rank Adaptation (LoRA)
-    to efficiently fine-tune DA3 on the MIMIR-UW underwater synthetic dataset 
-    (collected with Unreal Engine and AirSim, in the context of pipeline inspection)
+    to efficiently fine-tune DA3 on the MIMIR-UW @alvarez2023mimir underwater synthetic dataset (collected with Unreal Engine and AirSim, in the context of pipeline inspection)
     without catastrophic forgetting. We apply rank-8 LoRA to attention blocks
     of the DINOv2-L backbone, adapting approximately 1% of total parameters.
     Physics-aware preprocessing, like gray world white balance and percentile
     histogram stretching, corrects domain-specific degradation at load time.
-    Training on 39,943 synchronized RGB-depth pairs across four distinct
-    environments, we anticipate a 50% improvement in AbsRel over the pretrained
-    baseline on underwater scenes.
+    Training on 39,943 synchronized RGB-depth pairs from the Seafloor-Algae 
+    environments dataset, we anticipate a 50% improvement in AbsRel over the 
+    pretrained baseline on underwater scenes.
   ],
   bibliography: bibliography("main.bib"),
   accepted: true,
@@ -66,7 +65,7 @@ We describe the dataset, preprocessing pipeline, model adaptation strategy, and 
 
 == Training Dataset: MIMIR-UW
 
-We originally planned to generate training data from our own Unity AUV simulation environment. Upon critical review, we identified three key limitations of that approach: (1) the target corpus of 1,000–2,000 frames is insufficient for reliable ViT fine-tuning; (2) a single competition scene lacks the environmental diversity needed to prevent overfitting; and (3) our competition simulator was not purpose-built to model the underwater optical effects — backscatter, caustics, wavelength-dependent attenuation — that are the primary source of DA3's domain gap. We therefore adopt MIMIR-UW as our training corpus.
+We originally planned to generate training data from our own Unity AUV simulation environment. Upon critical review, we identified three key limitations of that approach: (1) the target corpus of 1,000–2,000 frames is insufficient for reliable ViT fine-tuning; (2) a single competition scene lacks the environmental diversity needed to prevent overfitting; and (3) our competition simulator was not purpose-built to model the underwater optical effects — backscatter, caustics, wavelength-dependent attenuation — which are the primary source of DA3's domain gap. We therefore adopt MIMIR-UW as our training corpus.
 
 MIMIR-UW is a synthetic underwater dataset rendered in Unreal Engine 4 with explicit modelling of underwater optical phenomena, providing 39,943 synchronized RGB-depth pairs across four distinct environments: SeaFloor, SeaFloor Algae, OceanFloor, and SandPipe. These environments span the full spectrum of underwater imaging challenges — from shallow well-lit scenes to deep conditions with artificial-light-only visibility. The dataset was specifically engineered to reproduce water distortion, backscatter, caustics, and wavelength-dependent attenuation effects, providing a physically grounded training distribution. Critically, MIMIR-UW's sim-to-real transfer capability for depth estimation has been validated in the original peer-reviewed work (Álvarez-Tuñón #etal, IROS 2023), where models trained on MIMIR-UW substantially outperformed those trained on terrestrial datasets on both simulated and real underwater evaluation data. This validation reduces experimental risk compared to an untested in-house dataset and provides a defensible baseline for comparison against prior work.
 
