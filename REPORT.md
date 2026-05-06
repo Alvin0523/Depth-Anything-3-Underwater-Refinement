@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This report documents the setup, configuration, and preparation for LoRA fine-tuning of Depth Anything 3 (DA3) Mono Metric Large on synthetic underwater RGB-depth pairs from a Unity AUV simulation. The project addresses domain adaptation challenges for underwater depth estimation through efficient parameter adaptation (rank-8 LoRA, ~1% trainable parameters) combined with physics-aware preprocessing. This document outlines the technical infrastructure, data pipeline, and training configuration required to execute the fine-tuning workflow on the NSCC HPC cluster.
+This report documents the setup, configuration, training, and results of LoRA fine-tuning of Depth Anything 3 (DA3) Mono Metric Large on the MIMIR-UW synthetic underwater dataset. The project addresses domain adaptation challenges for underwater depth estimation through efficient parameter adaptation (rank-8 LoRA, 9.24% trainable parameters) combined with physics-aware preprocessing. Training was executed on the NSCC HPC cluster (A100 40 GB) and achieved a final validation AbsRel of **0.099**, RMSE of **0.739 m**, and δ<1.25 accuracy of **91.0%** over 30 epochs.
 
 ---
 
@@ -51,24 +51,29 @@ git remote set-url upstream https://github.com/ByteDance-Seed/Depth-Anything-3.g
 
 ### 3.1 Dataset Structure and Format
 
-**Source:** HuggingFace dataset `Frieddeli/COMP4471` (Unity AUV simulation)
+**Source:** MIMIR-UW — Multipurpose Underwater Dataset (Cerqueira et al.)
+Collected with Unreal Engine 4 + AirSim plugin across four synthetic underwater environments: *SeaFloor*, *SeaFloor Algae*, *OceanFloor*, *SandPipe*.
+Converted from original EXR format to NPY for compatibility with the training pipeline.
 
 **Layout:**
 ```
-dataset/
-├── rgb/cam0/
-│   ├── 1662064607*.png  (RGB images, 8-bit PNG)
-│   └── ... (39,943 files)
-└── depth/cam0/
-    ├── 1662064607*.npy  (depth, float32, metres)
-    └── ... (39,943 files)
+data/unity/
+├── rgb/
+│   ├── <timestamp>.png  (RGB images, 8-bit PNG, 720×540)
+│   └── ... (7,499 files)
+└── depth/
+    ├── <timestamp>.npy  (inverse depth, float32)
+    └── ... (7,499 files)
 ```
 
 **Data Characteristics:**
-- **Modality:** Paired RGB + metric depth from synthetic underwater renders
-- **Camera:** Single view (cam0), 39,943 synchronized frame pairs
-- **Depth Format:** NumPy float32 arrays (direct metric depth in metres)
-- **Resolution:** Original ~1280×720 (resized to 518×518 during training)
+- **Modality:** Paired RGB + depth from synthetic underwater AUV trajectories
+- **Camera:** Forward-facing cam0, 7,499 synchronized frame pairs
+- **Depth Format:** NumPy float32 arrays storing **inverse depth** (1/metres), as per the MIMIR-UW paper: *"This depth recording is converted and stored as an inverse depth image for storage efficiency. The depth values recorded as zeros are stored as zeros in the inverse depth image to avoid zero division."*
+- **Background pixels:** Encoded as a very small positive value (~6×10⁻⁵), which converts to >10,000 m after inversion and is masked out by the 10 m cutoff
+- **Valid pixel fraction:** ~48% of pixels per frame (valid scene surface within 10 m)
+- **Metric depth range (valid pixels):** 2.0 m – 10.0 m, mean ~4.3 m
+- **Resolution:** 720×540 native (resized to 518×518 during training)
 
 ### 3.2 Preprocessing Pipeline
 
@@ -87,8 +92,8 @@ Applied at load-time (both train and inference):
 
 ### 3.3 Data Split
 
-- **Train:** 80% of pairs (31,954 samples)
-- **Validation:** 20% of pairs (7,989 samples)
+- **Train:** 80% of pairs (6,000 samples)
+- **Validation:** 20% of pairs (1,499 samples)
 - **Deterministic split:** Fixed random seed (42) for reproducibility
 
 ---
@@ -130,12 +135,14 @@ Applied at load-time (both train and inference):
 |-----------|-------|-----------|
 | Epochs | 30 | Balanced convergence without overfitting |
 | Batch Size | 16 | Maximize GPU utilization (A100 40GB handles ~16 @ 518×518) |
-| Learning Rate | 1e-4 | Conservative for LoRA fine-tuning |
+| Learning Rate | 2e-5 | Reduced from initial 1e-4 after observing instability |
 | Optimizer | AdamW | Standard for transformer adaptation |
 | Weight Decay | 1e-4 | L2 regularization |
 | Scheduler | Cosine Annealing | Smooth LR decay to learning rate floor (1e-6) |
 | Loss | SILog + Sobel Gradient | Scale-invariant log + edge-aware regularization |
 | Gradient Loss Weight | 0.5 | Balance photometric + geometric supervision |
+| Scale Anchor Weight | 0.1 | Penalises global depth scale drift in SILog |
+| Gradient Clip | 1.0 | Max gradient norm; prevents single-batch weight explosions |
 
 ### 5.3 Input Specifications
 
@@ -241,19 +248,27 @@ qsub test_lora_pipeline.pbs
 
 ---
 
-## 9. Expected Outcomes
+## 9. Training Results (Job 14352845)
 
-### 9.1 Performance Targets
+### 9.1 Final Performance
 
-- **Baseline (pretrained DA3 on underwater):** AbsRel ~0.35–0.40
-- **Target (after fine-tuning):** AbsRel ~0.15–0.20 (50% improvement anticipated)
-- **Training Time:** ~8–10 hours for 30 epochs @ batch 16
+| Metric | Epoch 1 | Epoch 10 | Epoch 18 | **Best (Ep 27)** | Epoch 30 |
+|--------|---------|---------|---------|-----------------|----------|
+| AbsRel | 0.186 | 0.115 | 0.102 | **0.099** | 0.099 |
+| RMSE (m) | 1.040 | 0.786 | 0.738 | **0.739** | 0.741 |
+| δ<1.25 | 76.5% | 88.9% | 90.6% | **91.0%** | 91.0% |
+
+- **Training time:** ~8.5 hours (30 epochs × ~17 min each, A100 40 GB)
+- **Best checkpoint:** epoch 27, uploaded to `Frieddeli/COMP4471` on HuggingFace
+- **Convergence:** Stable throughout; no divergence. Model plateaued naturally around epoch 18.
 
 ### 9.2 Output Artifacts
 
-- Trained LoRA weights: `checkpoints/best.pth`
-- Training logs: `train_lora.o<job_id>` (PBS output)
-- Depth predictions: Can be generated via inference script (to be implemented)
+- Trained LoRA weights: `/home/users/ntu/m230060/scratch/da3_checkpoints/best.pth`
+- Last checkpoint: `/home/users/ntu/m230060/scratch/da3_checkpoints/last.pth`
+- TensorBoard logs: `/home/users/ntu/m230060/scratch/da3_checkpoints/tb_logs/`
+- Training log: `train_lora_da3.o14352845`
+- HuggingFace: `Frieddeli/COMP4471` → `checkpoints/best.pth`
 
 ---
 
@@ -265,6 +280,10 @@ qsub test_lora_pipeline.pbs
 | Dataset too large for home | Quota limits | Symlinked from scratch storage |
 | Rate limit (HuggingFace API) | Concurrent downloads | Used `git clone` + git-lfs (batch download) |
 | Pixi env not isolated | Global python used | Explicitly call `.pixi/envs/default/bin/python` |
+| **AbsRel explosion (job 14344846)** | Depth loader treated inverse-depth NPY as direct metres (GT depths read as ~0.15 m instead of ~6.7 m) | Fixed `_load_depth` to invert: `depth = 1.0 / stored`; background pixels zeroed via 10 m cutoff |
+| Training divergence (lr=1e-4) | SILog `variance_focus` term cancels global scale penalty; model learned arbitrary scale offsets | Added scale anchor term (`λ·\|mean(log pred − log gt)\|`) to SILog; reduced lr to 2e-5 |
+| LoRA weights on CPU | `inject_lora()` creates new `nn.Linear` layers on CPU after model already moved to GPU | Added second `da3.to(device)` call after `inject_lora()` |
+| bfloat16 autocast → float32 Sobel mismatch | Autocast returned float16; Sobel kernel buffers were float32 | Switched to `torch.bfloat16` autocast + explicit `.float()` cast before loss |
 
 ---
 
@@ -316,5 +335,6 @@ Depth-Anything-3-Underwater-Refinement-/
 ---
 
 **Report Generated:** 2026-05-05  
-**Status:** Ready for Training Submission  
-**Next Step:** Execute `qsub train_lora.pbs`
+**Last Updated:** 2026-05-07  
+**Status:** Training Complete — Best AbsRel 0.099 (Job 14352845)  
+**Next Steps:** TensorRT export → Jetson Orin NX deployment → real pool test
