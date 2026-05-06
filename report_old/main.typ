@@ -23,15 +23,14 @@
     to underwater robotics requires adaptation to the underwater domain, where
     wavelength-dependent light attenuation causes chromatic aberration and
     backscatter reduces contrast. This work employs Low-Rank Adaptation (LoRA)
-    to efficiently fine-tune DA3 on the MIMIR-UW underwater synthetic dataset 
-    (collected with Unreal Engine and AirSim, in the context of pipeline inspection)
-    without catastrophic forgetting. We apply rank-8 LoRA to attention blocks
-    of the DINOv2-L backbone, adapting approximately 1% of total parameters.
-    Physics-aware preprocessing, like gray world white balance and percentile
-    histogram stretching, corrects domain-specific degradation at load time.
-    Training on 39,943 synchronized RGB-depth pairs across four distinct
-    environments, we anticipate a 50% improvement in AbsRel over the pretrained
-    baseline on underwater scenes.
+    to efficiently fine-tune DA3 on synthetic underwater data from a Unity AUV
+    simulation without catastrophic forgetting. We apply rank-8 LoRA to
+    attention blocks of the DINOv2-L backbone, adapting approximately 1% of
+    total parameters. Physics-aware preprocessing --- gray world white balance
+    and percentile histogram stretching --- corrects domain-specific degradation
+    at load time. Training on 39,943 synchronized RGB-depth pairs, we
+    anticipate a 50% improvement in AbsRel over the pretrained baseline on
+    underwater scenes.
   ],
   bibliography: bibliography("main.bib"),
   accepted: true,
@@ -64,13 +63,9 @@ This work presents a LoRA-based fine-tuning pipeline for DA3 on synthetic underw
 
 We describe the dataset, preprocessing pipeline, model adaptation strategy, and training configuration used in this work.
 
-== Training Dataset: MIMIR-UW
+== Dataset and Data Split
 
-We originally planned to generate training data from our own Unity AUV simulation environment. Upon critical review, we identified three key limitations of that approach: (1) the target corpus of 1,000–2,000 frames is insufficient for reliable ViT fine-tuning; (2) a single competition scene lacks the environmental diversity needed to prevent overfitting; and (3) our competition simulator was not purpose-built to model the underwater optical effects — backscatter, caustics, wavelength-dependent attenuation — that are the primary source of DA3's domain gap. We therefore adopt MIMIR-UW as our training corpus.
-
-MIMIR-UW is a synthetic underwater dataset rendered in Unreal Engine 4 with explicit modelling of underwater optical phenomena, providing 39,943 synchronized RGB-depth pairs across four distinct environments: SeaFloor, SeaFloor Algae, OceanFloor, and SandPipe. These environments span the full spectrum of underwater imaging challenges — from shallow well-lit scenes to deep conditions with artificial-light-only visibility. The dataset was specifically engineered to reproduce water distortion, backscatter, caustics, and wavelength-dependent attenuation effects, providing a physically grounded training distribution. Critically, MIMIR-UW's sim-to-real transfer capability for depth estimation has been validated in the original peer-reviewed work (Álvarez-Tuñón #etal, IROS 2023), where models trained on MIMIR-UW substantially outperformed those trained on terrestrial datasets on both simulated and real underwater evaluation data. This validation reduces experimental risk compared to an untested in-house dataset and provides a defensible baseline for comparison against prior work.
-
-The dataset is split 80/20 into training (31,954 samples) and validation (7,989 samples) using a fixed random seed of 42. RGB images are 8-bit PNGs at approximately 1280×720 resolution; depth ground truth is stored as float32 arrays in metres. All images are resized to 518×518 during training, satisfying the ViT patch tokenizer's requirement that spatial dimensions be a multiple of 14. Depths are clipped to [0,~10]~m to cover the typical operational range of underwater AUVs.
+The dataset consists of 39,943 synchronized RGB-depth frame pairs from a Unity-based AUV underwater simulation (Frieddeli/COMP4471). RGB images are 8-bit PNGs at approximately 1280×720 resolution; depth ground truth is stored as float32 NumPy arrays in metres. The data is split 80/20 into training (31,954 samples) and validation (7,989 samples) using a fixed random seed of 42. All images are resized to 518×518 during training, satisfying the ViT patch tokenizer's requirement that spatial dimensions be a multiple of 14. Depths are clipped to [0,~10]~m to cover the typical operational range of underwater AUVs.
 
 == Preprocessing Pipeline
 
@@ -186,7 +181,7 @@ To isolate the contribution of each pipeline component, three ablation variants 
 
 _To be completed after results are available._
 
-Key points to address: (1) quantitative gap between baseline and fine-tuned model; (2) which preprocessing step contributes most per the ablation; (3) remaining failure modes (#eg., strong backscatter, low-visibility scenes at depth > 8 m); (4) sim-to-real transfer capability — MIMIR-UW has demonstrated sim-to-real transfer on real underwater footage, but validation on real AUV footage would confirm applicability to our target domain; (5) limitation of single-camera setup and potential of multi-view DA3 for underwater AUV rigs.
+Key points to address: (1) quantitative gap between baseline and fine-tuned model; (2) which preprocessing step contributes most per the ablation; (3) remaining failure modes (#eg., strong backscatter, low-visibility scenes at depth > 8 m); (4) sim-to-real gap — the model is trained on synthetic Unity renders and may not generalize directly to real seafloor imagery without further adaptation; (5) limitation of single-camera setup and potential of multi-view DA3 for underwater AUV rigs.
 
 = Conclusion <sec:conclusion>
 
