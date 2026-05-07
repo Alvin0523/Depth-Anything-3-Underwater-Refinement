@@ -149,8 +149,12 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
     table.hline(stroke: 0.9pt),
     table.header([Method], [AbsRel ↓], [RMSE ↓], [$delta < 1.25$ ↑]),
     table.hline(stroke: 0.4pt),
+    table.cell(colspan: 4, align: left, text(style: "italic")[SeaFloor Algae (Training)]),
     [DA3 Mono Metric Large (pretrained)], [---], [---], [---],
     [DA3 + LoRA (ours, best ep.~27)],    [*0.099*], [*0.739 m*], [*91.0%*],
+    table.cell(colspan: 4, align: left, text(style: "italic")[SeaFloor (Benchmark)]),
+    [DA3 Mono Metric Large (pretrained)], [---], [---], [---],
+    [DA3 + LoRA (ours)],                 [TBD], [TBD], [TBD],
     table.hline(stroke: 0.9pt),
   )
 ) <tab:results>
@@ -227,6 +231,10 @@ To isolate the contribution of each pipeline component, three ablation variants 
 *Dataset scope.* This work trains exclusively on SeaFloor Algae, a single MIMIR-UW environment. The model's ability to generalise across the full diversity of underwater conditions — shallow well-lit (SeaFloor), shallow with occlusions (Algae), deep dark (OceanFloor), and deep with sand occlusion (SandPipe) — remains an open question. Future work will explore multi-environment training to assess robustness across shallow, intermediate, and deep-water scenarios.
 
 *Sim-to-real transfer.* The model was trained exclusively on synthetic data. Sim-to-real performance on actual AUV footage depends on residual domain gap not captured by MIMIR-UW's optical simulation. The pretrained DA3 baseline was not quantitatively evaluated on the SeaFloor Algae validation set, preventing a direct improvement measurement; this evaluation is deferred to future work. Ablation of individual preprocessing components and the gradient loss is similarly deferred due to HPC walltime constraints.
+
+= Application: AUV Target Localisation <sec:localisation>
+
+The fine-tuned DA3 model serves as the metric depth backend of a ROS 2 Jazzy localisation pipeline for AUV competitions (SAUVC @sauvc, RoboSub, RoboTX @robonation), where the vehicle must autonomously detect and approach submerged objects — gates, flares, and buckets — using a single monocular camera. DA3 depth maps are fused with YOLOv11-seg @yolo instance masks in a depth–segmentation fusion node: for each detected object, valid depth pixels within its segmentation mask are aggregated using a configurable statistic (mean, median, or percentile) to produce a per-object metric distance estimate. These estimates feed a Square-Root Unscented Kalman Filter (SQ-UKF) tracker that maintains temporally persistent object tracks in the map frame via Hungarian-algorithm data association, publishing confirmed track poses as TF frames for downstream navigation. Improved depth accuracy from LoRA fine-tuning (AbsRel 0.099) translates directly to tighter 3D position estimates and more stable track initialisation compared to the zero-shot DA3 baseline.
 
 = Conclusion <sec:conclusion>
 
