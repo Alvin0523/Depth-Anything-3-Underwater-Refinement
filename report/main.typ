@@ -223,6 +223,12 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
 
 = Application: AUV Target Localisation <sec:localisation>
 
+#figure(
+  caption: [Localisation system running in a pool environment under ROS 2 Jazzy. *Left:* Camera feed with YOLOv11-seg detections and per-object depth estimates (e.g., Yellow-flare at 1.3~m). *Right:* Foxglove 3D panel showing SQ-UKF tracks (T0–T5) alongside ground-truth TF frames (suffixed `_gt`) for gate, flares, and buckets. Tracks appear close to ground truth, confirming metric localisation accuracy.],
+  placement: top,
+  image("localisation_demo.png", width: 100%),
+) <fig:localisation>
+
 The fine-tuned DA3 model serves as the metric depth backend of a ROS 2 Jazzy localisation pipeline for AUV competitions (SAUVC @sauvc, RoboSub, RoboTX @robonation), where the vehicle must autonomously detect and approach submerged objects — gates, flares, and buckets — using a single monocular camera. DA3 depth maps are fused with YOLOv11-seg @yolo instance masks in a depth–segmentation fusion node: for each detected object, valid depth pixels within its segmentation mask are aggregated using a configurable statistic (mean, median, or percentile) to produce a per-object metric distance estimate. These estimates feed a Square-Root Unscented Kalman Filter (SQ-UKF) tracker that maintains temporally persistent object tracks in the map frame via Hungarian-algorithm data association, publishing confirmed track poses as TF frames for downstream navigation. Improved depth accuracy from LoRA fine-tuning (AbsRel 0.099) translates directly to tighter 3D position estimates and more stable track initialisation compared to the zero-shot DA3 baseline.
 
 = Conclusion <sec:conclusion>
