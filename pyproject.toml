@@ -10,48 +10,20 @@ readme = "README.md"
 requires-python = ">=3.9, <=3.13"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Your Name" }]
-
-dependencies = [
-    "pre-commit",
-    "trimesh",
-    "torch>=2",
-    "torchvision",
-    "einops",
-    "huggingface_hub",
-    "imageio",
-    "numpy<2",
-    "opencv-python",
-    "xformers",
-    "open3d",
-    "fastapi",
-    "uvicorn",
-    "requests",
-    "typer",
-    "pillow",
-    "omegaconf",
-    "evo",
-    "e3nn",
-    "moviepy",
-    "plyfile",
-    "pillow_heif",
-    "safetensors",
-    "uvicorn",
-    "moviepy==1.0.3",
-    "typer>=0.9.0",
-    "pycolmap",
-]
+dependencies = []  # managed by pixi — see [tool.pixi]
 
 [project.optional-dependencies]
-app = ["gradio>=5", "pillow>=9.0"] # requires that python3>=3.10
+app = ["gradio>=5", "pillow>=9.0"]
 gs = ["gsplat @ git+https://github.com/nerfstudio-project/gsplat.git@0b4dddf04cb687367602c01196913cde6a743d70"]
 all = ["depth-anything-3[app,gs]"]
-
 
 [project.scripts]
 da3 = "depth_anything_3.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/ByteDance-Seed/Depth-Anything-3"
+
+# ── Hatch build config ────────────────────────────────────────────────────────
 
 [tool.hatch.version]
 source = "vcs"
@@ -68,6 +40,52 @@ include = [
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+# ── Pixi workspace ────────────────────────────────────────────────────────────
+
+[tool.pixi.workspace]
+channels = ["conda-forge", "pytorch"]
+platforms = ["linux-64"]
+
+[tool.pixi.dependencies]
+python = "3.11.*"
+numpy = "<2"
+pillow = "*"
+pillow-heif = "*"
+opencv = "*"
+imageio = "*"
+omegaconf = "*"
+einops = "*"
+huggingface_hub = "*"
+safetensors = "*"
+addict = "*"
+pre-commit = "*"
+trimesh = "*"
+requests = "*"
+typer = ">=0.9.0"
+open3d = "*"
+plyfile = "*"
+e3nn = "*"
+tensorboard = "*"
+wandb = "*"
+pytorch = { version = ">=2.0", channel = "pytorch" }
+torchvision = { version = "*", channel = "pytorch" }
+pytorch-cuda = { version = "12.1.*", channel = "pytorch" }
+
+[tool.pixi.pypi-dependencies]
+xformers = "*"
+moviepy = "==1.0.3"
+evo = "*"
+pycolmap = "*"
+fastapi = "*"
+uvicorn = "*"
+depth-anything-3 = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+eval-baseline = "python train/evaluate.py --model_name da3metric-large --data_root data/seafloor"
+eval-finetuned = "python train/evaluate.py --model_name da3metric-large --checkpoint checkpoints/best.pth --data_root data/seafloor"
+
+# ── Linting / formatting ──────────────────────────────────────────────────────
 
 [tool.mypy]
 plugins = ["jaxtyping.mypy_plugin"]
