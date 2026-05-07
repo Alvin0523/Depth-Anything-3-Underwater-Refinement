@@ -1,0 +1,12 @@
+{
+  "label": "Fine-tuned (checkpoints/best.pth)",
+  "dataset": "/run/media/ray/9be01a0d-4e03-48ed-ae8a-3b1d35800bc9/Downloads/SeaFloor",
+  "n_frames": 14828,
+  "absrel": 0.3195905752127298,
+  "sqrel": 2.78978753269185,
+  "rmse": 6.401855866478755,
+  "rmse_log": 1.1233532843738996,
+  "delta1": 0.5680287398050216,
+  "delta2": 0.6957985183697908,
+  "delta3": 0.7555032712946306
+}

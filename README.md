@@ -67,6 +67,61 @@ python train/test_lora_pipeline.py
 python train/train.py --data_root data/unity --epochs 30 --batch_size 4
 ```
 
+### Benchmark — MIMIR SeaFloor dataset
+
+We evaluate on the [MIMIR SeaFloor](https://github.com/remaro-network/MIMIR-UW) benchmark — a photorealistic AUV simulation dataset with metric ground-truth depth stored as inverse-depth EXR files.
+
+**Dataset:** 3 tracks × 2 front cameras (cam0 = front-left, cam1 = front-right). cam2 (straight-down / `bottom_center`) is excluded as the model was not trained on nadir views.
+
+| | Frames |
+|---|---|
+| track0 | 2,847 × 2 cams = 5,694 |
+| track1 | 2,030 × 2 cams = 4,060 |
+| track2 | 2,537 × 2 cams = 5,074 |
+| **Total** | **14,828** |
+
+**Checkpoint:** [`Frieddeli/COMP4471`](https://huggingface.co/Frieddeli/COMP4471) on HuggingFace.
+
+#### Results
+
+| Model | AbsRel ↓ | SqRel ↓ | RMSE ↓ | RMSE_log ↓ | δ<1.25 ↑ | δ<1.25² ↑ | δ<1.25³ ↑ |
+|---|---|---|---|---|---|---|---|
+| DA3 Metric Large (zero-shot) | — | — | — | — | — | — | — |
+| DA3 + LoRA fine-tuned (ours) | — | — | — | — | — | — | — |
+
+> Results will be filled in once evaluation runs complete.
+
+**Run baseline:**
+```bash
+.pixi/envs/default/bin/python train/evaluate.py \
+  --data_root /path/to/SeaFloor \
+  --model_name da3metric-large \
+  --dataset_type seafloor \
+  --batch_size 2 --num_workers 2 \
+  --vis_dir results/vis_baseline \
+  --out_json results/baseline.json \
+  --per_image_csv results/baseline_per_image.csv
+```
+
+**Run fine-tuned:**
+```bash
+.pixi/envs/default/bin/python train/evaluate.py \
+  --data_root /path/to/SeaFloor \
+  --model_name da3metric-large \
+  --checkpoint checkpoints/best.pth \
+  --lora_rank 8 --lora_alpha 16.0 \
+  --dataset_type seafloor \
+  --batch_size 2 --num_workers 2 \
+  --vis_dir results/vis_finetuned \
+  --out_json results/finetuned.json \
+  --per_image_csv results/finetuned_per_image.csv
+```
+
+Outputs per run:
+- `results/*.json` — aggregate metrics
+- `results/*_per_image.csv` — per-frame metrics for all 14,828 frames (sort by absrel to find worst cases)
+- `results/vis_*/vis_NNNN.png` — 30 four-panel figures: RGB | predicted depth | GT depth | abs-rel error map
+
 ---
 
 This work presents **Depth Anything 3 (DA3)**, a model that predicts spatially consistent geometry from

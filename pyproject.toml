@@ -70,7 +70,7 @@ tensorboard = "*"
 wandb = "*"
 pytorch = { version = ">=2.0", channel = "pytorch" }
 torchvision = { version = "*", channel = "pytorch" }
-pytorch-cuda = { version = "12.1.*", channel = "pytorch" }
+pytorch-cuda = { version = "12.4.*", channel = "pytorch" }
 
 [tool.pixi.pypi-dependencies]
 xformers = "*"

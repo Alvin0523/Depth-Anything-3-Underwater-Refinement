@@ -1,0 +1,12 @@
+{
+  "label": "Baseline (zero-shot)",
+  "dataset": "/run/media/ray/9be01a0d-4e03-48ed-ae8a-3b1d35800bc9/Downloads/SeaFloor",
+  "n_frames": 14828,
+  "absrel": 0.7743855133564252,
+  "sqrel": 5.965645494987163,
+  "rmse": 8.35617615458198,
+  "rmse_log": 1.6429927937620117,
+  "delta1": 0.009356865659361792,
+  "delta2": 0.021578286504395305,
+  "delta3": 0.03811918604295808
+}
