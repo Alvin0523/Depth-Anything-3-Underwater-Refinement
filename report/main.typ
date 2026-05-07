@@ -130,7 +130,7 @@ The base model (DA3 Mono Metric Large) is loaded from HuggingFace (`depth-anythi
 
 == Visualization
 
-Depth predictions are rendered as false-color maps using the Spectral colormap, with near depths in warm tones and far depths in cool tones. Qualitative evaluation compares the pretrained DA3 baseline and the fine-tuned LoRA model outputs side-by-side against ground truth depth on held-out validation scenes.
+Depth predictions are rendered as false-color maps using the Spectral colormap, with near depths in warm tones and far depths in cool tones. Qualitative evaluation compares the pretrained DA3 baseline and the fine-tuned LoRA model outputs against ground truth depth on SeaFloor benchmark scenes.
 
 = Experiments <sec:experiments>
 
@@ -138,8 +138,10 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
 
 == Quantitative Results
 
+@tab:results reports depth metrics on both the SeaFloor Algae in-distribution validation set and the held-out SeaFloor benchmark. @fig:training shows the training and validation dynamics over 30 epochs.
+
 #figure(
-  caption: [Quantitative results on the SeaFloor Algae validation set (1,997 samples). Pretrained baseline evaluation is deferred to future work. Bold denotes best result.],
+  caption: [Quantitative results. SeaFloor Algae baseline is deferred (no held-out evaluation was run on the training environment). SeaFloor benchmark includes 14,828 frames. Bold denotes best result.],
   placement: top,
   table(
     columns: 4,
@@ -153,8 +155,8 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
     [DA3 Mono Metric Large (pretrained)], [---], [---], [---],
     [DA3 + LoRA (ours, best ep.~27)],    [*0.099*], [*0.739 m*], [*91.0%*],
     table.cell(colspan: 4, align: left, text(style: "italic")[SeaFloor (Benchmark)]),
-    [DA3 Mono Metric Large (pretrained)], [---], [---], [---],
-    [DA3 + LoRA (ours)],                 [TBD], [TBD], [TBD],
+    [DA3 Mono Metric Large (pretrained)], [0.774], [8.356 m], [0.9%],
+    [DA3 + LoRA (ours)],                 [*0.320*], [*6.402 m*], [*56.8%*],
     table.hline(stroke: 0.9pt),
   )
 ) <tab:results>
@@ -174,35 +176,22 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
 
 == Qualitative Results
 
+@fig:qualitative shows side-by-side depth predictions for two SeaFloor benchmark scenes, comparing the zero-shot baseline against the LoRA fine-tuned model.
+
 #figure(
-  caption: [Qualitative depth predictions on held-out underwater validation scenes. From left to right: RGB input, ground truth depth, pretrained DA3 baseline, LoRA fine-tuned model (ours). False-color maps use the Spectral colormap (warm = near, cool = far).],
+  caption: [Qualitative depth predictions on SeaFloor benchmark scenes. Each row shows (left to right): RGB input, predicted depth, ground truth depth, and absolute relative error map. *Top pair:* Scene 1 — baseline (AbsRel~=~0.650) vs. LoRA fine-tuned (AbsRel~=~0.202). *Bottom pair:* Scene 2 — baseline (AbsRel~=~0.858) vs. LoRA fine-tuned (AbsRel~=~0.202). The baseline predictions collapse to flat, scale-incorrect maps; the fine-tuned model recovers scene structure and metric scale.],
   placement: top,
-  kind: image,
-  rect(width: 3.25in - 1pt, height: 2.0in - 0.8pt, stroke: 0.4pt),
+  grid(
+    columns: 1,
+    gutter: 1pt,
+    image("qual_baseline_0000.png", width: 100%),
+    image("qual_finetuned_0000.png", width: 100%),
+    v(4pt),
+    image("qual_baseline_0005.png", width: 100%),
+    image("qual_finetuned_0005.png", width: 100%),
+  )
 ) <fig:qualitative>
 
-= Ablation Study <sec:ablation>
-
-To isolate the contribution of each pipeline component, three ablation variants are planned on the validation set. The full model results are reported; individual ablation runs are deferred to future work due to HPC walltime constraints.
-
-#figure(
-  caption: [Ablation study on the SeaFloor Algae validation set. The full model results are measured; ablation variants are deferred to future work.],
-  placement: top,
-  table(
-    columns: 5,
-    align: (left, center, center, center, center),
-    stroke: none,
-    inset: 5pt,
-    table.hline(stroke: 0.9pt),
-    table.header([Variant], [Preprocessing], [Grad. Loss], [AbsRel ↓], [RMSE ↓]),
-    table.hline(stroke: 0.4pt),
-    [Full model (ours)],             [✓], [✓], [*0.099*], [*0.739 m*],
-    [w/o preprocessing],             [✗], [✓], [---], [---],
-    [w/o gradient loss],             [✓], [✗], [---], [---],
-    [w/o preprocessing + grad. loss],[✗], [✗], [---], [---],
-    table.hline(stroke: 0.9pt),
-  )
-) <tab:ablation>
 
 = Discussion <sec:discussion>
 
@@ -228,9 +217,9 @@ To isolate the contribution of each pipeline component, three ablation variants 
   )
 ) <fig:step_losses>
 
-*Dataset scope.* This work trains exclusively on SeaFloor Algae, a single MIMIR-UW environment. The model's ability to generalise across the full diversity of underwater conditions — shallow well-lit (SeaFloor), shallow with occlusions (Algae), deep dark (OceanFloor), and deep with sand occlusion (SandPipe) — remains an open question. Future work will explore multi-environment training to assess robustness across shallow, intermediate, and deep-water scenarios.
+*Cross-environment generalisation.* This work trains exclusively on SeaFloor Algae and benchmarks on the held-out SeaFloor environment. The fine-tuned model achieves AbsRel~=~0.320 on SeaFloor versus the baseline's 0.774 — a 59% reduction — demonstrating meaningful cross-environment transfer despite the domain shift between training and test scenes. The model's ability to further generalise to OceanFloor and SandPipe environments, which introduce extreme darkness and deep-water conditions not present in SeaFloor Algae, remains an open question for future multi-environment training runs.
 
-*Sim-to-real transfer.* The model was trained exclusively on synthetic data. Sim-to-real performance on actual AUV footage depends on residual domain gap not captured by MIMIR-UW's optical simulation. The pretrained DA3 baseline was not quantitatively evaluated on the SeaFloor Algae validation set, preventing a direct improvement measurement; this evaluation is deferred to future work. Ablation of individual preprocessing components and the gradient loss is similarly deferred due to HPC walltime constraints.
+*Sim-to-real transfer.* The model was trained and benchmarked exclusively on synthetic data. Sim-to-real performance on actual AUV footage depends on residual domain gap not captured by MIMIR-UW's optical simulation. The pretrained DA3 baseline was not evaluated on the SeaFloor Algae validation split; on the SeaFloor benchmark, the baseline achieves AbsRel~=~0.774 with δ\<1.25 of just 0.9%, confirming that zero-shot DA3 is effectively non-functional in underwater scenes. LoRA fine-tuning recovers δ\<1.25 to 56.8%, though further improvement likely requires real underwater data for the final sim-to-real gap.
 
 = Application: AUV Target Localisation <sec:localisation>
 
@@ -240,4 +229,4 @@ The fine-tuned DA3 model serves as the metric depth backend of a ROS 2 Jazzy loc
 
 This work presents a parameter-efficient domain adaptation pipeline for underwater monocular metric depth estimation by applying rank-8 LoRA fine-tuning of DINOv2-L attention layers combined with physics-aware preprocessing (gray world white balance and percentile histogram stretching). The approach adapts a terrestrial depth foundation model to the underwater domain while updating only ~1% of parameters. Training on the SeaFloor Algae environment from MIMIR-UW for 30 epochs on a single A100 GPU achieves AbsRel~=~0.099, RMSE~=~0.739~m, and δ\<1.25~=~91.0% on the held-out validation set, substantially surpassing the 0.15–0.20 initial target. The combined SILog and Sobel gradient objective provides stable, scale-correct convergence without conflicting gradient signals.
 
-Future work includes: (1) quantitative evaluation of the pretrained DA3 baseline and ablation variants to isolate component contributions; (2) multi-environment training across the remaining MIMIR-UW environments (SeaFloor, OceanFloor, SandPipe) to assess generalisation across shallow, intermediate, and deep-water scenarios; (3) validation on real underwater AUV footage to characterise the sim-to-real transfer gap; (4) extension to multi-view DA3 for rigs with multiple synchronised cameras; and (5) knowledge distillation of the LoRA-adapted model for edge deployment on embedded AUV hardware.
+Future work includes: (1) multi-environment training across the remaining MIMIR-UW environments (OceanFloor, SandPipe) to improve generalisation to deep-water and sand-occluded scenes; (2) evaluation of the pretrained DA3 baseline on the SeaFloor Algae validation split to quantify in-distribution improvement; (3) validation on real underwater AUV footage to characterise the sim-to-real transfer gap; (4) extension to multi-view DA3 for rigs with multiple synchronised cameras; and (5) knowledge distillation of the LoRA-adapted model for edge deployment on embedded AUV hardware.
