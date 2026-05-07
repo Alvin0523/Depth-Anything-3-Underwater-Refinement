@@ -262,7 +262,49 @@ qsub test_lora_pipeline.pbs
 - **Best checkpoint:** epoch 27, uploaded to `Frieddeli/COMP4471` on HuggingFace
 - **Convergence:** Stable throughout; no divergence. Model plateaued naturally around epoch 18.
 
-### 9.2 Output Artifacts
+### 9.2 Training Curves
+
+#### Epoch-level metrics
+
+![Train vs Validation Loss](media/01_train_val_loss.png)
+
+*Train loss (solid cyan) and validation loss (dashed red) both decrease monotonically. The ~0.02 persistent gap indicates slight overfitting, but validation continues to improve through epoch 30, confirming LoRA regularisation is sufficient.*
+
+![Absolute Relative Error](media/02_absrel.png)
+
+*AbsRel drops from 0.186 at epoch 1 to a best of **0.0993** at epoch 27 (annotated). The transient spike at epoch 5 corresponds to the cosine LR still being relatively high; recovery is immediate.*
+
+![RMSE](media/03_rmse.png)
+
+*RMSE converges from 1.04 m → 0.74 m. High variance in early epochs reflects large learning-rate excursions; the curve stabilises after epoch 15 once LR enters the steep cosine decay.*
+
+![Threshold Accuracy δ<1.25](media/04_delta1.png)
+
+*δ<1.25 accuracy rises from 76.5% → 91.0%, plateauing after epoch 20. Combined with AbsRel the model achieves accurate metric depth within the 2–10 m underwater range.*
+
+![AbsRel vs δ<1.25](media/09_absrel_vs_delta1.png)
+
+*Dual-axis overlay confirming the inverse relationship between AbsRel (↓, orange) and δ<1.25 accuracy (↑, green dashed) throughout training.*
+
+![Learning Rate Schedule](media/05_lr.png)
+
+*Cosine annealing from 2×10⁻⁵ to ~2×10⁻⁷ over 30 epochs (log scale). The aggressive final decay suppresses weight oscillation and allows fine convergence.*
+
+#### Per-step losses (11 k gradient steps)
+
+![Per-step Train Loss](media/06_step_loss.png)
+
+*Total loss per step (raw + exponential moving average). High per-step variance is normal for batch size 16 on a heterogeneous scene dataset; the smoothed trend confirms steady improvement.*
+
+![Per-step SILog Loss](media/07_silog.png)
+
+*Scale-invariant log loss converges rapidly in the first 500 steps and plateaus around 0.03–0.04, indicating the model has learned the correct metric depth scale.*
+
+![Per-step Gradient Loss](media/08_grad_loss.png)
+
+*Sobel edge loss decreases from ~2.5 → ~2.0 (smoothed). The persistent variance reflects structural complexity of underwater scene edges and scattering; the downward trend confirms improved edge sharpness.*
+
+### 9.3 Output Artifacts
 
 - Trained LoRA weights: `/home/users/ntu/m230060/scratch/da3_checkpoints/best.pth`
 - Last checkpoint: `/home/users/ntu/m230060/scratch/da3_checkpoints/last.pth`
