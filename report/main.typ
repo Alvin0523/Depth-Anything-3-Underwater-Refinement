@@ -2,15 +2,15 @@
 #import "logo.typ": LaTeX, TeX
 
 #let affls = (
-  a1: (department: "ID: XXXXXXXX", institution: "HKUST", location: "Hong Kong"),
-  a2: (department: "ID: XXXXXXXX", institution: "HKUST", location: "Hong Kong"),
-  a3: (department: "ID: XXXXXXXX", institution: "HKUST", location: "Hong Kong"),
+  a1: (department: "ID: 21335422", institution: "HKUST", location: "Hong Kong"),
+  a2: (department: "ID: 21335381", institution: "HKUST", location: "Hong Kong"),
+  a3: (department: "ID: 21335472", institution: "HKUST", location: "Hong Kong"),
 )
 
 #let authors = (
   (name: "Shao, Yingzhan", affl: ("a1",), email: "yshaoau@connect.ust.hk"),
-  (name: "Wong, Wei Ming", affl: ("a2",), email: "wmwong@connect.ust.hk"),
-  (name: "Dana, Yak",    affl: ("a3",), email: "ydana@connect.ust.hk"),
+  (name: "Wong, Wei Ming", affl: ("a2",), email: "wmwongap@connect.ust.hk"),
+  (name: "Dana, Yak",    affl: ("a3",), email: "dyak@connect.ust.hk"),
 )
 
 #show: cvpr2025.with(
