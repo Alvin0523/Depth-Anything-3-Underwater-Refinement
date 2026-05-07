@@ -10,7 +10,7 @@
 #let authors = (
   (name: "Shao, Yingzhan", affl: ("a1",), email: "yshaoau@connect.ust.hk"),
   (name: "Wong, Wei Ming", affl: ("a2",), email: "wmwongap@connect.ust.hk"),
-  (name: "Dana, Yak",    affl: ("a3",), email: "dyak@connect.ust.hk"),
+  (name: "Yak, Dana",    affl: ("a3",), email: "dyak@connect.ust.hk"),
 )
 
 #show: cvpr2025.with(
@@ -23,16 +23,18 @@
     to underwater robotics requires adaptation to the underwater domain, where
     wavelength-dependent light attenuation causes chromatic aberration and
     backscatter reduces contrast. This work employs Low-Rank Adaptation (LoRA)
-    to efficiently fine-tune DA3 on the MIMIR-UW @alvarez2023mimir underwater synthetic dataset (collected with Unreal Engine and AirSim, in the context of pipeline inspection)
+    to efficiently fine-tune DA3 on the MIMIR-UW @alvarez2023mimir underwater synthetic dataset
+    (rendered in Unreal Engine 4 with AirSim, in the context of pipeline inspection)
     without catastrophic forgetting. We apply rank-8 LoRA to attention blocks
     of the DINOv2-L backbone, adapting approximately 1% of total parameters.
-    Physics-aware preprocessing, like gray world white balance and percentile
-    histogram stretching, corrects domain-specific degradation at load time.
-    Trained on the full MIMIR-UW corpus (39,943 synchronized RGB-depth pairs
-    across four synthetic environments), the fine-tuned model achieves an AbsRel
-    of 0.099, RMSE of 0.739~m, and δ\<1.25 accuracy of 91.0% on the held-out
-    validation set after 30 epochs — a result substantially below the 0.15–0.20
-    target and well within the metric range required for underwater AUV operation.
+    Physics-aware preprocessing — gray world white balance and percentile
+    histogram stretching — corrects domain-specific degradation at load time.
+    Trained on the SeaFloor Algae environment (9,987 synchronized RGB-depth pairs
+    with dynamic occluding objects and high texture complexity), the fine-tuned
+    model achieves an AbsRel of 0.099, RMSE of 0.739~m, and δ\<1.25 accuracy
+    of 91.0% on the held-out validation set after 30 epochs — substantially
+    below the 0.15–0.20 initial target and well within the metric range required
+    for underwater AUV operation.
   ],
   bibliography: bibliography("main.bib"),
   accepted: true,
@@ -69,9 +71,11 @@ We describe the dataset, preprocessing pipeline, model adaptation strategy, and 
 
 We originally planned to generate training data from our own Unity AUV simulation environment. Upon critical review, we identified three key limitations of that approach: (1) the target corpus of 1,000–2,000 frames is insufficient for reliable ViT fine-tuning; (2) a single competition scene lacks the environmental diversity needed to prevent overfitting; and (3) our competition simulator was not purpose-built to model the underwater optical effects — backscatter, caustics, wavelength-dependent attenuation — which are the primary source of DA3's domain gap. We therefore adopt MIMIR-UW as our training corpus.
 
-MIMIR-UW is a synthetic underwater dataset rendered in Unreal Engine 4 with explicit modelling of underwater optical phenomena, providing 39,943 synchronized RGB-depth pairs across four distinct environments: SeaFloor, SeaFloor Algae, OceanFloor, and SandPipe. These environments span the full spectrum of underwater imaging challenges — from shallow well-lit scenes to deep conditions with artificial-light-only visibility. The dataset was specifically engineered to reproduce water distortion, backscatter, caustics, and wavelength-dependent attenuation effects, providing a physically grounded training distribution. Critically, MIMIR-UW's sim-to-real transfer capability for depth estimation has been validated in the original peer-reviewed work (Álvarez-Tuñón #etal, IROS 2023), where models trained on MIMIR-UW substantially outperformed those trained on terrestrial datasets on both simulated and real underwater evaluation data. This validation reduces experimental risk compared to an untested in-house dataset and provides a defensible baseline for comparison against prior work.
+MIMIR-UW is a synthetic underwater dataset rendered in Unreal Engine 4 with explicit modelling of underwater optical phenomena. The dataset provides 39,943 synchronized RGB-depth pairs across four distinct environments — SeaFloor, SeaFloor Algae, OceanFloor, and SandPipe — spanning the full spectrum of underwater imaging challenges from shallow well-lit scenes to deep conditions with artificial-light-only visibility. MIMIR-UW's sim-to-real transfer capability for depth estimation has been validated in the original peer-reviewed work (Álvarez-Tuñón #etal, IROS 2023), where models trained on MIMIR-UW substantially outperformed those trained on terrestrial datasets. This validation reduces experimental risk compared to an untested in-house dataset.
 
-The dataset is split 80/20 into training (31,954 samples) and validation (7,989 samples) using a fixed random seed of 42. RGB images are 8-bit PNGs at approximately 1280×720 resolution; depth ground truth is stored as float32 arrays in metres. All images are resized to 518×518 during training, satisfying the ViT patch tokenizer's requirement that spatial dimensions be a multiple of 14. Depths are clipped to [0,~10]~m to cover the typical operational range of underwater AUVs.
+For this work, we focus on the *SeaFloor Algae* environment (9,987 frames, ~25% of the full dataset), which presents a challenging mid-complexity scenario: shallow visibility with dynamic occluding algae objects and high texture complexity — characteristics that demand robust depth discrimination without the confounding factors of extreme depth or darkness. We reserve exploration of the remaining environments (SeaFloor, OceanFloor, SandPipe) for future multi-environment training runs that will further validate model generalisation across the full spectrum of underwater conditions.
+
+The SeaFloor Algae subset is split 80/20 into training (7,990 samples) and validation (1,997 samples) using a fixed random seed of 42. RGB images are 8-bit PNGs at approximately 1280×720 resolution; depth ground truth is stored as float32 arrays in metres. All images are resized to 518×518 during training, satisfying the ViT patch tokenizer's requirement that spatial dimensions be a multiple of 14. Depths are clipped to [0,~10]~m to cover the typical operational range of underwater AUVs.
 
 == Preprocessing Pipeline
 
@@ -130,12 +134,12 @@ Depth predictions are rendered as false-color maps using the Spectral colormap, 
 
 = Experiments <sec:experiments>
 
-Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cores, 64~GB RAM) via PBS job scheduling. Training completed in approximately 8.5 hours over 30 epochs (~17 minutes per epoch). The best checkpoint was saved at epoch 27 with a validation AbsRel of 0.099 and uploaded to HuggingFace (`Frieddeli/COMP4471`). @fig:training shows the epoch-level and per-step training dynamics.
+Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cores, 64~GB RAM) via PBS job scheduling. Training completed in approximately 8.5 hours over 30 epochs (\~17 minutes per epoch). The best checkpoint was saved at epoch 27 with a validation AbsRel of 0.099 and uploaded to HuggingFace (`Frieddeli/COMP4471`). @fig:training shows the epoch-level and per-step training dynamics.
 
 == Quantitative Results
 
 #figure(
-  caption: [Quantitative results on the MIMIR-UW validation set (7,989 samples). Pretrained baseline evaluation is deferred to future work. Bold denotes best result.],
+  caption: [Quantitative results on the SeaFloor Algae validation set (1,997 samples). Pretrained baseline evaluation is deferred to future work. Bold denotes best result.],
   placement: top,
   table(
     columns: 4,
@@ -178,7 +182,7 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
 To isolate the contribution of each pipeline component, three ablation variants are planned on the validation set. The full model results are reported; individual ablation runs are deferred to future work due to HPC walltime constraints.
 
 #figure(
-  caption: [Ablation study on the MIMIR-UW validation set. The full model results are measured; ablation variants are deferred to future work.],
+  caption: [Ablation study on the SeaFloor Algae validation set. The full model results are measured; ablation variants are deferred to future work.],
   placement: top,
   table(
     columns: 5,
@@ -220,10 +224,12 @@ To isolate the contribution of each pipeline component, three ablation variants 
   )
 ) <fig:step_losses>
 
-*Limitations.* The model was trained exclusively on MIMIR-UW synthetic data. Sim-to-real performance on actual AUV footage depends on residual domain gap not captured by MIMIR-UW's optical simulation. The pretrained DA3 baseline was not quantitatively evaluated on the underwater validation set, preventing a direct improvement measurement; this evaluation is deferred to future work. Ablation of individual preprocessing components and the gradient loss is similarly deferred due to HPC walltime constraints.
+*Dataset scope.* This work trains exclusively on the SeaFloor Algae environment, a single subset of the full MIMIR-UW corpus. SeaFloor Algae presents a challenging mid-complexity scenario with dynamic occlusions and high texture variation, making it a defensible representative choice. However, the model's ability to generalise across the full diversity of underwater conditions — from shallow well-lit SeaFloor scenes to dark deep-water OceanFloor and SandPipe environments — remains an open question. Future work will explore multi-environment training to assess whether ensemble training across all four MIMIR-UW environments improves robustness and depth accuracy in out-of-distribution shallow and deep-water scenarios.
+
+*Sim-to-real transfer.* The model was trained exclusively on synthetic data. Sim-to-real performance on actual AUV footage depends on residual domain gap not captured by MIMIR-UW's optical simulation. The pretrained DA3 baseline was not quantitatively evaluated on the SeaFloor Algae validation set, preventing a direct improvement measurement; this evaluation is deferred to future work. Ablation of individual preprocessing components and the gradient loss is similarly deferred due to HPC walltime constraints.
 
 = Conclusion <sec:conclusion>
 
-This work presents a parameter-efficient domain adaptation pipeline for underwater monocular metric depth estimation. By combining rank-8 LoRA fine-tuning of the DINOv2-L attention layers in Depth Anything 3 with physics-aware preprocessing — gray world white balance and percentile histogram stretching — we adapt a state-of-the-art terrestrial depth foundation model to the synthetic underwater domain using only ~1% of trainable parameters. Training on the MIMIR-UW synthetic corpus for 30 epochs on a single A100 GPU achieves AbsRel~=~0.099, RMSE~=~0.739~m, and δ\<1.25~=~91.0% on the held-out validation set, substantially surpassing the 0.15–0.20 initial target. The combined SILog and Sobel gradient objective provides stable, scale-correct convergence without conflicting gradient signals.
+This work presents a parameter-efficient domain adaptation pipeline for underwater monocular metric depth estimation. By combining rank-8 LoRA fine-tuning of the DINOv2-L attention layers in Depth Anything 3 with physics-aware preprocessing — gray world white balance and percentile histogram stretching — we adapt a state-of-the-art terrestrial depth foundation model to the synthetic underwater domain using only ~1% of trainable parameters. Training on the SeaFloor Algae environment from MIMIR-UW for 30 epochs on a single A100 GPU achieves AbsRel~=~0.099, RMSE~=~0.739~m, and δ\<1.25~=~91.0% on the held-out validation set, substantially surpassing the 0.15–0.20 initial target. The combined SILog and Sobel gradient objective provides stable, scale-correct convergence without conflicting gradient signals.
 
-Future work includes: (1) quantitative evaluation of the pretrained DA3 baseline and ablation variants to isolate component contributions; (2) validation on real underwater AUV footage to characterise the sim-to-real transfer gap; (3) extension to multi-view DA3 for rigs with multiple synchronised cameras; and (4) knowledge distillation of the LoRA-adapted model for edge deployment on embedded AUV hardware.
+Future work includes: (1) quantitative evaluation of the pretrained DA3 baseline and ablation variants to isolate component contributions; (2) multi-environment training across the remaining MIMIR-UW environments (SeaFloor, OceanFloor, SandPipe) to assess generalisation across shallow, intermediate, and deep-water scenarios; (3) validation on real underwater AUV footage to characterise the sim-to-real transfer gap; (4) extension to multi-view DA3 for rigs with multiple synchronised cameras; and (5) knowledge distillation of the LoRA-adapted model for edge deployment on embedded AUV hardware.
