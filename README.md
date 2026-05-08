@@ -80,7 +80,7 @@ All training code lives in [`train/`](train/):
 
 For the full project plan, NSCC setup, job scripts, and per-person TODO list, see [`comp4471.md`](comp4471.md).
 
-### Quick start (smoke test — no data needed)
+### Quick start (NSCC env check — no data needed)
 
 ```bash
 pip install -e .
@@ -114,7 +114,7 @@ We evaluate on the [MIMIR-UW SeaFloor](https://github.com/remaro-network/MIMIR-U
 
 **Checkpoint:** [`Frieddeli/COMP4471`](https://huggingface.co/Frieddeli/COMP4471) on HuggingFace.
 
-### Run baseline
+### Run baseline (0 shot, no checkpoints)
 
 ```bash
 .pixi/envs/default/bin/python train/evaluate.py \
@@ -401,69 +401,3 @@ The Nested series uses an Any-view model to estimate pose and depth, and a monoc
   </details>
 
 - **Older GPUs without XFormers support**: See [Issue #11](https://github.com/ByteDance-Seed/Depth-Anything-3/issues/11). Thanks to [@S-Mahoney](https://github.com/S-Mahoney) for the solution!
-
-## 🏢 Awesome DA3 Projects
-
-A community-curated list of Depth Anything 3 integrations across 3D tools, creative pipelines, robotics, and web/VR viewers. You are welcome to submit your DA3-based project via PR.
-
-- [DA3-blender](https://github.com/xy-gao/DA3-blender): Blender addon for DA3-based 3D reconstruction from a set of images.
-- [ComfyUI-DepthAnythingV3](https://github.com/PozzettiAndrea/ComfyUI-DepthAnythingV3): ComfyUI nodes for Depth Anything 3, supporting single/multi-view and video-consistent depth with optional point-cloud export.
-- [DA3-ROS2-Wrapper](https://github.com/GerdsenAI/GerdsenAI-Depth-Anything-3-ROS2-Wrapper): Real-time DA3 depth in ROS2 with multi-camera support.
-- [DA3-ROS2-CPP-TensorRT](https://github.com/ika-rwth-aachen/ros2-depth-anything-v3-trt): DA3 ROS2 C++ TensorRT Inference Node for real-time inference.
-- [VideoDepthViewer3D](https://github.com/amariichi/VideoDepthViewer3D): Streaming videos with DA3 metric depth to a Three.js/WebXR 3D viewer for VR/stereo playback.
-
-## 🧑‍💻 Official Codebase Core Contributors and Maintainers
-
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://bingykang.github.io/">
-        <img src="https://images.weserv.nl/?url=https://bingykang.github.io/images/bykang_homepage.jpeg?h=100&w=100&fit=cover&mask=circle&maxage=7d" width="100px;" alt=""/>
-      </a>
-      <br /><sub><b>Bingyi Kang</b></sub>
-    </td>
-    <td align="center">
-      <a href="https://haotongl.github.io/">
-        <img src="https://images.weserv.nl/?url=https://haotongl.github.io/assets/img/prof_pic.jpg?h=100&w=100&fit=cover&mask=circle&maxage=7d" width="100px;" alt=""/>
-      </a>
-      <br /><sub>Haotong Lin</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/SiliChen321">
-        <img src="https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/195901058?v=4&h=100&w=100&fit=cover&mask=circle&maxage=7d" width="100px;" alt=""/>
-      </a>
-      <br /><sub>Sili Chen</sub>
-    </td>
-    <td align="center">
-      <a href="https://liewjunhao.github.io/">
-        <img src="https://images.weserv.nl/?url=https://liewjunhao.github.io/images/liewjunhao.png?h=100&w=100&fit=cover&mask=circle&maxage=7d" width="100px;" alt=""/>
-      </a>
-      <br /><sub>Jun Hao Liew</sub>
-    </td>
-    <td align="center">
-      <a href="https://donydchen.github.io/">
-        <img src="https://images.weserv.nl/?url=https://donydchen.github.io/assets/img/profile.jpg?h=100&w=100&fit=cover&mask=circle&maxage=7d" width="100px;" alt=""/>
-      </a>
-      <br /><sub>Donny Y. Chen</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/DengKaiCQ">
-        <img src="https://images.weserv.nl/?url=https://avatars.githubusercontent.com/u/59907452?v=4&h=100&w=100&fit=cover&mask=circle&maxage=7d" width="100px;" alt=""/>
-      </a>
-      <br /><sub>Kai Deng</sub>
-    </td>
-  </tr>
-</table>
-
-## 📝 Citations
-
-If you find Depth Anything 3 useful in your research or projects, please cite our work:
-
-```bibtex
-@article{depthanything3,
-  title={Depth Anything 3: Recovering the visual space from any views},
-  author={Haotong Lin and Sili Chen and Jun Hao Liew and Donny Y. Chen and Zhenyu Li and Guang Shi and Jiashi Feng and Bingyi Kang},
-  journal={arXiv preprint arXiv:2511.10647},
-  year={2025}
-}
-```
