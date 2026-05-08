@@ -2,9 +2,9 @@
 #import "logo.typ": LaTeX, TeX
 
 #let affls = (
-  a1: (department: "ID: 21335422", institution: "HKUST", location: "Hong Kong"),
-  a2: (department: "ID: 21335381", institution: "HKUST", location: "Hong Kong"),
-  a3: (department: "ID: 21335472", institution: "HKUST", location: "Hong Kong"),
+  a1: (institution: "HKUST", location: "Hong Kong"),
+  a2: (institution: "HKUST", location: "Hong Kong"),
+  a3: (institution: "HKUST", location: "Hong Kong"),
 )
 
 #let authors = (
