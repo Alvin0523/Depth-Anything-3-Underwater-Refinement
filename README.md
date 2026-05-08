@@ -86,10 +86,8 @@ We evaluate on the [MIMIR SeaFloor](https://github.com/remaro-network/MIMIR-UW) 
 
 | Model | AbsRel ↓ | SqRel ↓ | RMSE ↓ | RMSE_log ↓ | δ<1.25 ↑ | δ<1.25² ↑ | δ<1.25³ ↑ |
 |---|---|---|---|---|---|---|---|
-| DA3 Metric Large (zero-shot) | — | — | — | — | — | — | — |
-| DA3 + LoRA fine-tuned (ours) | — | — | — | — | — | — | — |
-
-> Results will be filled in once evaluation runs complete.
+| DA3 Metric Large (zero-shot) | 0.7744 | 5.9656 | 8.3562 | 1.6430 | 0.0094 | 0.0216 | 0.0381 |
+| DA3 + LoRA fine-tuned (ours) | **0.3196** | **2.7898** | **6.4019** | **1.1234** | **0.5680** | **0.6958** | **0.7555** |
 
 **Run baseline:**
 ```bash
@@ -122,7 +120,49 @@ Outputs per run:
 - `results/*_per_image.csv` — per-frame metrics for all 14,828 frames (sort by absrel to find worst cases)
 - `results/vis_*/vis_NNNN.png` — 30 four-panel figures: RGB | predicted depth | GT depth | abs-rel error map
 
----
+#### Live evaluation demo (`train/demo_eval.py`)
+
+`train/demo_eval.py` runs inference and opens a **live matplotlib popup** that updates as evaluation proceeds — useful for presentations.
+
+**Layout (dark theme, 28×14 figure):**
+- **Top row:** RGB input · Predicted depth (plasma) · GT depth (plasma) · Abs-rel error map (hot)
+- **Bottom row:** AbsRel · RMSE · δ<1.25 line charts (one data point per evaluated batch) · Running-average summary box
+
+**Arguments:**
+
+| Argument | Default | Description |
+|---|---|---|
+| `--data_root` | — | Path to SeaFloor dataset root |
+| `--model_name` | `da3metric-large` | DA3 model config name |
+| `--checkpoint` | `None` | Path to LoRA checkpoint (omit for zero-shot baseline) |
+| `--lora_rank` | `8` | LoRA rank (must match checkpoint) |
+| `--lora_alpha` | `16.0` | LoRA alpha |
+| `--stride` | `1` | Evaluate every Nth sample (e.g. `10` → ~1,480 frames, ~3 min) |
+| `--update_every` | `10` | Refresh the window every N batches |
+| `--batch_size` | `2` | Inference batch size |
+| `--num_workers` | `2` | DataLoader workers |
+
+**Run fine-tuned demo:**
+```bash
+.pixi/envs/default/bin/python train/demo_eval.py \
+  --data_root /path/to/SeaFloor \
+  --model_name da3metric-large \
+  --checkpoint checkpoints/best.pth \
+  --lora_rank 8 --lora_alpha 16.0 \
+  --stride 10 --update_every 5
+```
+
+**Run baseline demo (zero-shot, no checkpoint):**
+```bash
+.pixi/envs/default/bin/python train/demo_eval.py \
+  --data_root /path/to/SeaFloor \
+  --model_name da3metric-large \
+  --stride 10 --update_every 5
+```
+
+> **Note:** requires a display (X11/Wayland). The window will auto-maximise on TkAgg backends. Requires `matplotlib`, `tqdm`, and the same pixi env used for training.
+
+
 
 This work presents **Depth Anything 3 (DA3)**, a model that predicts spatially consistent geometry from
 arbitrary visual inputs, with or without known camera poses.
