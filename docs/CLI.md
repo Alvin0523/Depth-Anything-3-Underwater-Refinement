@@ -1,22 +1,6 @@
 # 🚀 Depth Anything 3 Command Line Interface
 
-## 📋 Table of Contents
-
-- [📖 Overview](#overview)
-- [⚡ Quick Start](#quick-start)
-- [📚 Command Reference](#command-reference)
-  - [🤖 auto - Auto Mode](#auto---auto-mode)
-  - [🖼️ image - Single Image Processing](#image---single-image-processing)
-  - [🗂️ images - Image Directory Processing](#images---image-directory-processing)
-  - [🎬 video - Video Processing](#video---video-processing)
-  - [📐 colmap - COLMAP Dataset Processing](#colmap---colmap-dataset-processing)
-  - [🔧 backend - Backend Service](#backend---backend-service)
-  - [🎨 gradio - Gradio Application](#gradio---gradio-application)
-  - [🖼️ gallery - Gallery Server](#gallery---gallery-server)
-- [⚙️ Parameter Details](#parameter-details)
-- [💡 Usage Examples](#usage-examples)
-
-## 📖 Overview
+##  Overview
 
 The Depth Anything 3 CLI provides a comprehensive command-line toolkit supporting image depth estimation, video processing, COLMAP dataset handling, and web applications.
 
@@ -75,15 +59,15 @@ da3 auto INPUT_PATH [OPTIONS]
 | `--process-res-method` | str | `upper_bound_resize` | Processing resolution method |
 | `--export-feat` | str | `""` | Export features from specified layers, comma-separated (e.g., `"0,1,2"`) |
 | `--auto-cleanup` | bool | `False` | Automatically clean export directory without confirmation |
-| `--fps` | float | `1.0` | [Video] Frame sampling FPS |
-| `--sparse-subdir` | str | `""` | [COLMAP] Sparse reconstruction subdirectory (e.g., `"0"` for `sparse/0/`) |
-| `--align-to-input-ext-scale` | bool | `True` | [COLMAP] Align prediction to input extrinsics scale |
+| `--fps` | float | `1.0` | `[Video]` Frame sampling FPS |
+| `--sparse-subdir` | str | `""` | `[COLMAP]` Sparse reconstruction subdirectory (e.g., `"0"` for `sparse/0/`) |
+| `--align-to-input-ext-scale` | bool | `True` | `[COLMAP]` Align prediction to input extrinsics scale |
 | `--use-ray-pose` | bool | `False` | Use ray-based pose estimation instead of camera decoder |
 | `--ref-view-strategy` | str | `saddle_balanced` | Reference view selection strategy: `first`, `middle`, `saddle_balanced`, `saddle_sim_range`. See [docs](funcs/ref_view_strategy.md) |
-| `--conf-thresh-percentile` | float | `40.0` | [GLB] Lower percentile for adaptive confidence threshold |
-| `--num-max-points` | int | `1000000` | [GLB] Maximum number of points in the point cloud |
-| `--show-cameras` | bool | `True` | [GLB] Show camera wireframes in the exported scene |
-| `--feat-vis-fps` | int | `15` | [FEAT_VIS] Frame rate for output video |
+| `--conf-thresh-percentile` | float | `40.0` | `[GLB]` Lower percentile for adaptive confidence threshold |
+| `--num-max-points` | int | `1000000` | `[GLB]` Maximum number of points in the point cloud |
+| `--show-cameras` | bool | `True` | `[GLB]` Show camera wireframes in the exported scene |
+| `--feat-vis-fps` | int | `15` | `[FEAT_VIS]` Frame rate for output video |
 
 **Examples:**
 
@@ -131,10 +115,10 @@ da3 image IMAGE_PATH [OPTIONS]
 | `--auto-cleanup` | bool | `False` | Automatically clean export directory |
 | `--use-ray-pose` | bool | `False` | Use ray-based pose estimation instead of camera decoder |
 | `--ref-view-strategy` | str | `saddle_balanced` | Reference view selection strategy. See [docs](funcs/ref_view_strategy.md) |
-| `--conf-thresh-percentile` | float | `40.0` | [GLB] Confidence threshold percentile |
-| `--num-max-points` | int | `1000000` | [GLB] Maximum number of points |
-| `--show-cameras` | bool | `True` | [GLB] Show cameras |
-| `--feat-vis-fps` | int | `15` | [FEAT_VIS] Video frame rate |
+| `--conf-thresh-percentile` | float | `40.0` | `[GLB]` Confidence threshold percentile |
+| `--num-max-points` | int | `1000000` | `[GLB]` Maximum number of points |
+| `--show-cameras` | bool | `True` | `[GLB]` Show cameras |
+| `--feat-vis-fps` | int | `15` | `[FEAT_VIS]` Video frame rate |
 
 **Examples:**
 
@@ -185,10 +169,10 @@ da3 images IMAGES_DIR [OPTIONS]
 | `--auto-cleanup` | bool | `False` | Automatically clean export directory |
 | `--use-ray-pose` | bool | `False` | Use ray-based pose estimation instead of camera decoder |
 | `--ref-view-strategy` | str | `saddle_balanced` | Reference view selection strategy. See [docs](funcs/ref_view_strategy.md) |
-| `--conf-thresh-percentile` | float | `40.0` | [GLB] Confidence threshold percentile |
-| `--num-max-points` | int | `1000000` | [GLB] Maximum number of points |
-| `--show-cameras` | bool | `True` | [GLB] Show cameras |
-| `--feat-vis-fps` | int | `15` | [FEAT_VIS] Video frame rate |
+| `--conf-thresh-percentile` | float | `40.0` | `[GLB]` Confidence threshold percentile |
+| `--num-max-points` | int | `1000000` | `[GLB]` Maximum number of points |
+| `--show-cameras` | bool | `True` | `[GLB]` Show cameras |
+| `--feat-vis-fps` | int | `15` | `[FEAT_VIS]` Video frame rate |
 
 **Examples:**
 
@@ -236,10 +220,10 @@ da3 video VIDEO_PATH [OPTIONS]
 | `--auto-cleanup` | bool | `False` | Automatically clean export directory |
 | `--use-ray-pose` | bool | `False` | Use ray-based pose estimation instead of camera decoder |
 | `--ref-view-strategy` | str | `saddle_balanced` | Reference view selection strategy. See [docs](funcs/ref_view_strategy.md) |
-| `--conf-thresh-percentile` | float | `40.0` | [GLB] Confidence threshold percentile |
-| `--num-max-points` | int | `1000000` | [GLB] Maximum number of points |
-| `--show-cameras` | bool | `True` | [GLB] Show cameras |
-| `--feat-vis-fps` | int | `15` | [FEAT_VIS] Video frame rate |
+| `--conf-thresh-percentile` | float | `40.0` | `[GLB]` Confidence threshold percentile |
+| `--num-max-points` | int | `1000000` | `[GLB]` Maximum number of points |
+| `--show-cameras` | bool | `True` | `[GLB]` Show cameras |
+| `--feat-vis-fps` | int | `15` | `[FEAT_VIS]` Video frame rate |
 
 **Examples:**
 
@@ -291,10 +275,10 @@ da3 colmap COLMAP_DIR [OPTIONS]
 | `--auto-cleanup` | bool | `False` | Automatically clean export directory |
 | `--use-ray-pose` | bool | `False` | Use ray-based pose estimation instead of camera decoder |
 | `--ref-view-strategy` | str | `saddle_balanced` | Reference view selection strategy. See [docs](funcs/ref_view_strategy.md) |
-| `--conf-thresh-percentile` | float | `40.0` | [GLB] Confidence threshold percentile |
-| `--num-max-points` | int | `1000000` | [GLB] Maximum number of points |
-| `--show-cameras` | bool | `True` | [GLB] Show cameras |
-| `--feat-vis-fps` | int | `15` | [FEAT_VIS] Video frame rate |
+| `--conf-thresh-percentile` | float | `40.0` | `[GLB]` Confidence threshold percentile |
+| `--num-max-points` | int | `1000000` | `[GLB]` Maximum number of points |
+| `--show-cameras` | bool | `True` | `[GLB]` Show cameras |
+| `--feat-vis-fps` | int | `15` | `[FEAT_VIS]` Video frame rate |
 
 **Examples:**
 

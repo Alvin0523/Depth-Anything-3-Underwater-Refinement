@@ -1,127 +1,108 @@
 # Underwater DA3: LoRA Fine-Tuning of Depth Anything 3 for AUV Depth Estimation
 
 <p align="center">
-
-<img src="assets/images/demo320-2.gif" alt="DA3 Underwater Demo" width="70%"/>
-
+  <img src="media/image.png" alt="DA3 Underwater Depth Evaluation — RGB input, predicted depth, GT depth, and AbsRel error map with running metrics" width="90%"/>
 </p>
 
 <p align="center">
-
-<a href="https://arxiv.org/abs/2511.10647"><img src="https://img.shields.io/badge/arXiv-Depth%20Anything%203-red" alt="Paper PDF"/></a> <a href="https://depth-anything-3.github.io"><img src="https://img.shields.io/badge/Project_Page-Depth%20Anything%203-green" alt="Project Page"/></a> <a href="https://huggingface.co/Frieddeli/COMP4471"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Checkpoint-orange" alt="HuggingFace Checkpoint"/></a> <a href="https://github.com/remaro-network/MIMIR-UW"><img src="https://img.shields.io/badge/Dataset-MIMIR--UW-blue" alt="MIMIR-UW Dataset"/></a> <img src="https://img.shields.io/badge/Platform-NSCC%20A100-76b900?logo=nvidia" alt="NSCC A100"/> <img src="https://img.shields.io/badge/ROS2-Humble-22314E?logo=ros" alt="ROS2"/> <img src="https://img.shields.io/badge/Course-HKUST%20COMP4471-003366" alt="HKUST COMP4471"/>
-
+  <a href="https://arxiv.org/abs/2511.10647"><img src="https://img.shields.io/badge/arXiv-Depth%20Anything%203-red" alt="Paper"/></a>
+  <a href="https://huggingface.co/Frieddeli/COMP4471"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Checkpoint-orange" alt="Checkpoint"/></a>
+  <a href="https://github.com/remaro-network/MIMIR-UW"><img src="https://img.shields.io/badge/Dataset-MIMIR--UW-blue" alt="Dataset"/></a>
+  <img src="https://img.shields.io/badge/Platform-NSCC%20A100-76b900?logo=nvidia" alt="NSCC A100"/>
+  <img src="https://img.shields.io/badge/ROS2-Jazzy-22314E?logo=ros" alt="ROS2 Jazzy"/>
+  <img src="https://img.shields.io/badge/Pixi-Managed-yellow?logo=conda-forge" alt="Pixi"/>
+  <img src="https://img.shields.io/badge/Course-HKUST%20COMP4471-003366" alt="HKUST COMP4471"/>
 </p>
 
 <p align="center">
-
-<strong>Fine-tune DA3 for underwater metric depth estimation via LoRA — part of a full AUV target localisation pipeline.</strong>
-
+  <a href="https://alvin0523.github.io/vlash-piper/"><img src="https://img.shields.io/badge/%F0%9F%93%96%20Read%20the%20Docs-Operation%20Guide%20%26%20Reference-blue?style=for-the-badge" alt="Read the Docs"/></a>
 </p>
 
-> **This is a fork of the [original DA3 repo](https://github.com/ByteDance-Seed/Depth-Anything-3).** We fine-tune DA3 Mono Metric Large for underwater depth estimation using LoRA, as part of our COMP4471 course project on Autonomous Underwater Vehicles (AUVs).
+<p align="center">
+  <strong>LoRA fine-tuning of DA3 Mono Metric Large for underwater metric depth estimation — integrated into a full AUV target localisation pipeline with YOLOv11-seg and SQ-UKF tracking.</strong>
+</p>
 
-------------------------------------------------------------------------
+> **Fork of [ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3).** All fine-tuning, evaluation, and AUV integration code lives in [`train/`](train/).
 
-## About
+---
 
-DA3 was trained on terrestrial data and performs poorly underwater due to the domain gap — wavelength-dependent light attenuation produces a strong blue-green colour cast, and backscatter degrades contrast. This project adapts DA3 to the underwater domain and integrates it into a full ROS 2 target localisation pipeline.
+## 📖 About
+
+DA3 (Depth Anything 3) achieves state-of-the-art metric depth on terrestrial benchmarks but fails dramatically underwater — wavelength-dependent light attenuation causes a blue-green colour cast, and backscatter reduces contrast. We adapt DA3 Mono Metric Large to the underwater domain via rank-8 LoRA fine-tuning and integrate it into a full ROS 2 AUV localisation pipeline.
 
 | Component | Role |
-|----|----|
-| `train/` | LoRA fine-tuning pipeline for DA3 on MIMIR-UW |
-| YOLOv26-seg | Instance segmentation — produces per-object binary masks |
-| DA3 Metric Large | Per-pixel metric depth estimation from a single RGB image |
-| Mask × Depth fusion | Median depth within each instance mask → distance estimate |
+|---|---|
+| `train/` | LoRA fine-tuning pipeline (dataset → training → evaluation) |
+| YOLOv11-seg | Instance segmentation — per-object binary masks |
+| DA3 Mono Metric Large | Per-pixel metric depth from a single RGB frame |
+| Mask × Depth fusion | Aggregates valid depth pixels per mask → per-object distance |
+| SQ-UKF tracker | Temporally persistent object tracks published as ROS 2 TF frames |
 
-### Hugging Face
+### 🤗 Hugging Face
 
-+-----------------------------------+-----------------------------------------------------------------+
-| Type                              | Link                                                            |
-+===================================+=================================================================+
-| Fine-tuned Checkpoint             | [Frieddeli/COMP4471](https://huggingface.co/Frieddeli/COMP4471) |
-+-----------------------------------+-----------------------------------------------------------------+
+| Type | Link |
+|---|---|
+| Fine-tuned checkpoint | [Frieddeli/COMP4471](https://huggingface.co/Frieddeli/COMP4471) |
 
-------------------------------------------------------------------------
+---
 
-## What We Did
+## 📁 Project Structure
 
-DA3 was trained on terrestrial data and performs poorly underwater due to the domain gap — wavelength-dependent light attenuation causes a strong blue-green colour cast, and backscatter degrades contrast. We are adapting DA3 to the underwater domain via:
+```
+Depth-Anything-3-Underwater-Refinement/
+├── train/                   # ← all fine-tuning code (our contribution)
+│   ├── dataset.py           # MIMIR-UW loader + physics-aware preprocessing
+│   ├── lora.py              # LoRA injection into DINOv2-L attention blocks
+│   ├── losses.py            # SILog (+ scale anchor) + Sobel gradient loss
+│   ├── train.py             # main training script
+│   ├── evaluate.py          # benchmarking (AbsRel, RMSE, δ<1.25)
+│   ├── demo_eval.py         # live matplotlib evaluation demo
+│   └── test_lora_pipeline.py# smoke test — run before training on HPC
+├── src/depth_anything_3/    # original DA3 package (installed via pixi)
+│   ├── model/da3.py         # DepthAnything3Net (DINOv2-L + DPT head)
+│   ├── model/dinov2/        # DINOv2 ViT backbone
+│   └── configs/             # YAML model configs
+├── results/                 # benchmark outputs (JSON, CSV, visualisations)
+├── media/                   # training curves, qualitative comparison figures
+├── report/                  # CVPR-style Typst report (main.typ)
+├── docs/                    # extended documentation
+│   ├── quickstart.md        # environment setup + first run
+│   ├── dataset.md           # MIMIR-UW format, preprocessing, splits
+│   ├── implementation.md    # what each file implements
+│   └── operation-guide.md   # full HPC training + evaluation workflow
+├── pyproject.toml           # package + Pixi workspace config
+└── README.md
+```
 
-- **LoRA fine-tuning** of the DINOv2-L backbone (rank=8, α=16, \~1% trainable params of \~300M total)
-- **MIMIR-UW training data** — 39,943 synchronized RGB+metric depth pairs from a photorealistic Unreal Engine 4 AUV simulation, spanning 4 underwater environments (SeaFloor, SeaFloor Algae, OceanFloor, SandPipe)
-- **Physics-aware preprocessing** — Gray World white balance + percentile histogram stretching, applied consistently at both train and inference time
-- **Combined loss** — SILog + Sobel gradient loss for metric accuracy and edge sharpness
-- **Full localisation pipeline** — YOLOv26-seg instance masks + DA3 depth map → median depth per object → distance estimate published over ROS 2 with TensorRT optimisation
+---
 
-The fine-tuned model feeds into a full target localisation pipeline: YOLOv26-seg instance masks + DA3 depth map → median depth per object → distance estimate published over ROS 2.
+## 🚀 Quick Start
 
-------------------------------------------------------------------------
+**1. Install [Pixi](https://pixi.sh/) (one-time):**
 
-## Fine-Tuning Code
+```bash
+curl -fsSL https://pixi.sh/install.sh | bash
+```
 
-All training code lives in [`train/`](train/):
+**2. Clone and install:**
 
-| File | Purpose |
-|----|----|
-| `train/lora.py` | LoRA injection into DINOv2 attention blocks |
-| `train/losses.py` | SILog + Sobel gradient loss |
-| `train/dataset.py` | MIMIR-UW RGB+depth dataset loader with preprocessing |
-| `train/train.py` | Main training script |
-| `train/evaluate.py` | Benchmarking (AbsRel, RMSE, δ\<1.25) |
-| `train/demo_eval.py` | Live matplotlib evaluation demo |
-| `train/test_lora_pipeline.py` | Smoke test — run on NSCC first to verify env |
+```bash
+git clone https://github.com/Alvin0523/Depth-Anything-3-Underwater-Refinement-.git
+cd Depth-Anything-3-Underwater-Refinement
+pixi install
+```
 
-For the full project plan, NSCC setup, job scripts, and per-person TODO list, see [`comp4471.md`](comp4471.md).
+**3. Smoke test (no data needed — verifies the full LoRA pipeline):**
 
-### Quick start (NSCC env check — no data needed)
-
-``` bash
-pip install -e .
-python train/test_lora_pipeline.py
+```bash
+pixi run python train/test_lora_pipeline.py
 # Expected: ALL CHECKS PASSED
 ```
 
-### Train (once MIMIR-UW data is ready)
+**4. Run fine-tuned evaluation against the MIMIR-UW SeaFloor benchmark:**
 
-``` bash
-python train/train.py \
-  --data_root /path/to/MIMIR-UW \
-  --epochs 30 \
-  --batch_size 16
-```
-
-------------------------------------------------------------------------
-
-## Benchmark — MIMIR-UW SeaFloor Dataset
-
-We evaluate on the [MIMIR-UW SeaFloor](https://github.com/remaro-network/MIMIR-UW) benchmark — a photorealistic AUV simulation dataset with metric ground-truth depth stored as inverse-depth EXR files.
-
-**Dataset:** 3 tracks × 2 front cameras (cam0 = front-left, cam1 = front-right). cam2 (straight-down) is excluded as the model was not trained on nadir views. 14,828 frames total with metric ground-truth depth stored as inverse-depth EXR files.
-
-| Tracks    | Frames                 |
-|-----------|------------------------|
-| track0    | 2,847 × 2 cams = 5,694 |
-| track1    | 2,030 × 2 cams = 4,060 |
-| track2    | 2,537 × 2 cams = 5,074 |
-| **Total** | **14,828**             |
-
-**Run baseline (0 shot, no checkpoints)**
-
-``` bash
-.pixi/envs/default/bin/python train/evaluate.py \
-  --data_root /path/to/SeaFloor \
-  --model_name da3metric-large \
-  --dataset_type seafloor \
-  --batch_size 2 --num_workers 2 \
-  --vis_dir results/vis_baseline \
-  --out_json results/baseline.json \
-  --per_image_csv results/baseline_per_image.csv
-```
-
-**Run fine-tuned**
-
-``` bash
-.pixi/envs/default/bin/python train/evaluate.py \
+```bash
+pixi run python train/evaluate.py \
   --data_root /path/to/SeaFloor \
   --model_name da3metric-large \
   --checkpoint checkpoints/best.pth \
@@ -133,101 +114,143 @@ We evaluate on the [MIMIR-UW SeaFloor](https://github.com/remaro-network/MIMIR-U
   --per_image_csv results/finetuned_per_image.csv
 ```
 
-Outputs per run:
+👉 For full HPC training, NSCC job scripts, and the complete workflow — see [docs/operation-guide.md](docs/operation-guide.md).
 
-- `results/*.json` — aggregate metrics
+---
 
-- `results/*_per_image.csv` — per-frame metrics for all 14,828 frames (sort by absrel to find worst cases)
+## 📊 Benchmark — MIMIR-UW SeaFloor Dataset
 
-- `results/vis_*/vis_NNNN.png` — 30 four-panel figures: RGB \| predicted depth \| GT depth \| abs-rel error map
+Evaluated on the held-out [MIMIR-UW SeaFloor](https://github.com/remaro-network/MIMIR-UW) benchmark — 14,828 frames across 3 tracks × 2 front cameras with metric ground-truth depth stored as inverse-depth EXR files.
 
-### Benchmarking Results
+| Model | AbsRel ↓ | SqRel ↓ | RMSE ↓ | RMSE_log ↓ | δ<1.25 ↑ | δ<1.25² ↑ | δ<1.25³ ↑ |
+|---|---|---|---|---|---|---|---|
+| DA3 Mono Metric Large (zero-shot) | 0.7744 | 5.9656 | 8.3562 | 1.6430 | 0.94% | 2.16% | 3.81% |
+| **DA3 + LoRA fine-tuned (ours)** | **0.3196** | **2.7898** | **6.4019** | **1.1234** | **56.8%** | **69.6%** | **75.6%** |
 
-| Model | AbsRel ↓ | SqRel ↓ | RMSE ↓ | RMSE_log ↓ | δ\<1.25 ↑ | δ\<1.25² ↑ | δ\<1.25³ ↑ |
-|----|----|----|----|----|----|----|----|
-| DA3 Metric Large (zero-shot) | 0.7744 | 5.9656 | 8.3562 | 1.6430 | 0.0094 | 0.0216 | 0.0381 |
-| **DA3 + LoRA fine-tuned (ours)** | **0.3196** | **2.7898** | **6.4019** | **1.1234** | **0.5680** | **0.6958** | **0.7555** |
-
-> LoRA fine-tuning achieves a **59% reduction in AbsRel** over the zero-shot baseline, with δ\<1.25 accuracy improving from 0.94% to 56.8%.
->
+> LoRA fine-tuning achieves a **59% reduction in AbsRel** over the zero-shot baseline, with δ<1.25 accuracy improving from 0.94% → 56.8%.
 > **Checkpoint:** [`Frieddeli/COMP4471`](https://huggingface.co/Frieddeli/COMP4471) on HuggingFace.
 
-### Live evaluation demo (`train/demo_eval.py`)
+### SeaFloor Benchmark Frame Breakdown
 
-`train/demo_eval.py` runs inference and opens a **live matplotlib popup** that updates as evaluation proceeds — useful for presentations.
+| Track | Frames |
+|---|---|
+| track0 | 2,847 × 2 cams = 5,694 |
+| track1 | 2,030 × 2 cams = 4,060 |
+| track2 | 2,537 × 2 cams = 5,074 |
+| **Total** | **14,828** |
 
-**Layout (dark theme, 28×14 figure):**
+---
 
-- **Top row:** RGB input \| Predicted depth (plasma) \| GT depth (plasma) \| Abs-rel error map (hot)
+## 🏗️ System Architecture
 
-- **Bottom row:** AbsRel \| RMSE \| δ\<1.25 line charts (one data point per evaluated batch) \| Running-average summary box
-
-| Argument | Default | Description |
-|----|----|----|
-| `--data_root` | — | Path to SeaFloor dataset root |
-| `--model_name` | `da3metric-large` | DA3 model config name |
-| `--checkpoint` | `None` | Path to LoRA checkpoint (omit for zero-shot baseline) |
-| `--lora_rank` | `8` | LoRA rank (must match checkpoint) |
-| `--lora_alpha` | `16.0` | LoRA alpha |
-| `--stride` | `1` | Evaluate every Nth sample (e.g. `10` → \~1,480 frames, \~3 min) |
-| `--update_every` | `10` | Refresh the window every N batches |
-| `--batch_size` | `2` | Inference batch size |
-| `--num_workers` | `2` | DataLoader workers |
-
-``` bash
-# Run fine-tuned model
-.pixi/envs/default/bin/python train/demo_eval.py \
-  --data_root /path/to/SeaFloor \
-  --checkpoint checkpoints/best.pth \
-  --lora_rank 8 --lora_alpha 16.0 \
-  --stride 10 --update_every 5
-
-# Zero-shot baseline (no checkpoint)
-.pixi/envs/default/bin/python train/demo_eval.py \
-  --data_root /path/to/SeaFloor \
-  --stride 10 --update_every 5
+```
+Camera feed (monocular RGB)
+    ├─── [Branch A] YOLOv11-seg (TensorRT) ──► instance masks
+    └─── [Branch B] DA3 Mono Metric Large  ──► per-pixel depth map (metres)
+              ▼
+    Mask × Depth Fusion
+    (median depth within each segmentation mask)
+              ▼
+    "Gate at 2.3 m" — ROS 2 topic
+              ▼
+    SQ-UKF Tracker (Hungarian association)
+              ▼
+    TF frames → AUV navigation
 ```
 
-> **Note:** requires a display (X11/Wayland). The window will auto-maximise on TkAgg backends. Requires `matplotlib`, `tqdm`, and the same pixi env used for training.
+![Localisation Demo](media/localisation_demo.png)
 
-------------------------------------------------------------------------
+> ROS 2 Jazzy running inside the NTU Mecatron Unity simulation. **Left:** YOLOv11-seg detections with per-object depth estimates. **Right:** Foxglove 3D panel showing SQ-UKF tracks (T0–T5) alongside ground-truth TF frames for gate, flares, and buckets.
 
-## Team
+---
 
-**HKUST COMP4471 — Course Project**
+## 🔬 What We Did
 
-+-------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
-|                                                                                                             |                                                                                                           |                                                                                         |
-+=============================================================================================================+===========================================================================================================+=========================================================================================+
-| [![Shao Ying Zhan](https://github.com/frieddeli.png){alt="Shao Ying Zhan"} ](https://github.com/frieddeli)\ | [![Wong Wei Ming](https://github.com/Alvin0523.png){alt="Wong Wei Ming"} ](https://github.com/Alvin0523)\ | [![Dana Yak](https://github.com/dnyk7.png){alt="Dana Yak"} ](https://github.com/dnyk7)\ |
-| ~**Shao\ Ying\ Zhan**~                                                                                      | ~**Wong\ Wei\ Ming**~                                                                                     | ~**Dana\ Yak**~                                                                         |
-+-------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+- **LoRA fine-tuning** — rank-8 LoRA on all DINOv2-L attention projections (q/k/v/out); ~9.24% trainable params (~3M LoRA + fully trainable DPT head of ~300M total)
+- **MIMIR-UW training data** — 9,987 SeaFloor Algae RGB+depth pairs from the [MIMIR-UW](https://github.com/remaro-network/MIMIR-UW) synthetic underwater dataset (remaro-network); depth stored as float32 inverse-depth (1/metres) and inverted at load time
+- **Physics-aware preprocessing** — Gray World white balance + percentile histogram stretching (2nd–98th) applied at train and inference time
+- **Combined loss** — SILog with scale anchor term (`+ 0.1·|mean(g)|`) + Sobel gradient loss; scale anchor prevents AbsRel divergence when variance-focus cancels global scale penalty
+- **Depth model adaptation** is the primary contribution of this repo — the full AUV deployment pipeline (Unity simulation, real pool testing, ROS 2 localisation with SQ-UKF and TF frames) was developed collaboratively as part of [NTU Mecatron](https://github.com/mecatron); pipeline code is withheld as it is actively used in competition
 
-| Name           | Email                    |
-|----------------|--------------------------|
-| Shao Ying Zhan | yshaoau\@connect.ust.hk  |
-| Wong Wei Ming  | wmwongap\@connect.ust.hk |
-| Dana Yak       | dyak\@connect.ust.hk     |
+---
 
-------------------------------------------------------------------------
+## 🗺️ Roadmap & Status
 
-## DA3 Quick Start in our repository
+| Task | Status | Notes |
+|---|---|---|
+| LoRA fine-tuning pipeline | ✅ Complete | `train/train.py`, best checkpoint at epoch 27 |
+| MIMIR-UW SeaFloor benchmark | ✅ Complete | 14,828 frames, results in `results/` |
+| Physics-aware preprocessing | ✅ Complete | `train/dataset.py` |
+| ROS 2 localisation integration | ✅ Complete | YOLOv11-seg + DA3 + SQ-UKF (not disclosed) |
+| Real pool test (physical AUV) | ✅ Complete | Validated in pool with real footage from NTU Mecatron |
+| Qualitative visualisations | ✅ Complete | `media/qual_*.png` |
+| Multi-environment domain adaptation | ⏳ Planned | True underwater domain shift (OceanFloor, SandPipe, open water) |
 
-### Installation
+---
 
-``` bash
-pixi install
+## 📚 Documentation
+
+| Guide | Contents |
+|---|---|
+| [Quick Start](docs/quickstart.md) | Environment setup, smoke test, first evaluation run |
+| [Dataset](docs/dataset.md) | MIMIR-UW format, inverse depth, preprocessing, splits |
+| [Implementation](docs/implementation.md) | What each file in `train/` implements |
+| [Operation Guide](docs/operation-guide.md) | Full HPC training workflow, NSCC job scripts |
+| [CLI](docs/CLI.md) | Original DA3 command-line interface |
+| [API](docs/API.md) | Original DA3 Python API |
+| [Benchmark](docs/BENCHMARK.md) | Original DA3 benchmark evaluation |
+
+---
+
+## 📜 Citation
+
+```bibtex
+@article{lin2025da3,
+  title   = {Depth Anything 3: Recovering the Visual Space from Any Views},
+  author  = {Lin, Hengkai and others},
+  journal = {arXiv preprint arXiv:2511.10647},
+  year    = {2025}
+}
+
+@inproceedings{alvarez2023mimir,
+  title     = {MIMIR: A Multipurpose Underwater Robotics Dataset for Sim-to-Real Transfer},
+  author    = {Álvarez-Tuñón, Olaya and others},
+  booktitle = {IROS},
+  year      = {2023}
+}
+
+@article{hu2021lora,
+  title   = {LoRA: Low-Rank Adaptation of Large Language Models},
+  author  = {Hu, Edward J. and others},
+  journal = {arXiv preprint arXiv:2106.09685},
+  year    = {2021}
+}
 ```
 
-The model architecture is defined in [`DepthAnything3Net`](src/depth_anything_3/model/da3.py), and specified with a Yaml config file located at [`src/depth_anything_3/configs`](src/depth_anything_3/configs). The input and output processing are handled by [`DepthAnything3`](src/depth_anything_3/api.py). To customize the model architecture, simply create a new config file and reference it as:
+---
 
-``` python
-from depth_anything_3.cfg import create_object, load_config
-Model = create_object(load_config("path/to/new/config"))
-```
+## 👥 Authors
 
-## Useful Documentation
+HKUST COMP4471 — Course Project
 
-- [Command Line Interface](docs/CLI.md)
-- [Python API](docs/API.md)
-- [Benchmark Evaluation](docs/BENCHMARK.md)
+[<img src="https://github.com/Alvin0523.png" width="80" style="border-radius:50%">](https://github.com/Alvin0523)
+[<img src="https://github.com/frieddeli.png" width="80" style="border-radius:50%">](https://github.com/frieddeli)
+[<img src="https://github.com/dnyk7.png" width="80" style="border-radius:50%">](https://github.com/dnyk7)
+
+
+| Name | GitHub |
+|---|---|
+| Wong Wei Ming | [@Alvin0523](https://github.com/Alvin0523) |
+| Shao Ying Zhan | [@frieddeli](https://github.com/frieddeli) |
+| Dana Yak | [@dnyk7](https://github.com/dnyk7) |
+
+---
+
+## 🙌 Acknowledgements
+
+- [ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3) — base model and DA3 package
+- [NTU Mecatron](https://github.com/mecatron) — Unity simulation engine for full AUV pipeline testing and real pool footage; we are part of the Mecatron team
+- [remaro-network/MIMIR-UW](https://github.com/remaro-network/MIMIR-UW) — synthetic underwater dataset used for fine-tuning
+- [facebookresearch/dinov2](https://github.com/facebookresearch/dinov2) — DINOv2-L backbone
+- [NSCC Singapore](https://www.nscc.sg/) — A100 GPU compute
+

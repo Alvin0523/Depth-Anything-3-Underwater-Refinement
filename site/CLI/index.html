@@ -1,0 +1,2429 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LoRA fine-tuning of Depth Anything 3 for underwater AUV depth estimation — dataset, training, evaluation, and HPC workflow.">
+      
+      
+        <meta name="author" content="Wong Wei Ming, Shao Ying Zhan, Dana Yak">
+      
+      
+      
+        <link rel="prev" href="../operation-guide/">
+      
+      
+        <link rel="next" href="../API/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.40">
+    
+    
+      
+        <title>🚀 Depth Anything 3 Command Line Interface - Underwater DA3 Docs</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#depth-anything-3-command-line-interface" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="Underwater DA3 Docs" class="md-header__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Underwater DA3 Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🚀 Depth Anything 3 Command Line Interface
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="Underwater DA3 Docs" class="md-nav__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    Underwater DA3 Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Quick Start
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Dataset
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Implementation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operation Guide
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 CLI Reference
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 CLI Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Quick Start
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Command Reference
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Command Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auto-auto-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🤖 auto - Auto Mode
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-single-image-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🖼️ image - Single Image Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#images-image-directory-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🗂️ images - Image Directory Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-video-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎬 video - Video Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colmap-colmap-dataset-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📐 colmap - COLMAP Dataset Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-backend-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 backend - Backend Service
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gradio-gradio-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 gradio - Gradio Application
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gallery-gallery-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🖼️ gallery - Gallery Server
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameter-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Parameter Details
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Parameter Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 Common Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glb-export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 GLB Export Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-visualization-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Feature Visualization Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-specific-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎬 Video-Specific Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colmap-specific-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📐 COLMAP-Specific Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💡 Usage Examples
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-basic-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1️⃣ Basic Workflow
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-using-auto-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        2️⃣ Using Auto Mode
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-multi-format-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        3️⃣ Multi-Format Export
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-advanced-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        4️⃣ Advanced Configuration
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-batch-processing-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        5️⃣ Batch Processing Workflow
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-web-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        6️⃣ Web Applications
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-transformer-feature-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        7️⃣ Transformer Feature Visualization
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📝 Notes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ❓ Getting Help
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 API Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BENCHMARK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 Benchmark
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Quick Start
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Command Reference
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Command Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auto-auto-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🤖 auto - Auto Mode
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-single-image-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🖼️ image - Single Image Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#images-image-directory-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🗂️ images - Image Directory Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-video-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎬 video - Video Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colmap-colmap-dataset-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📐 colmap - COLMAP Dataset Processing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-backend-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 backend - Backend Service
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gradio-gradio-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 gradio - Gradio Application
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gallery-gallery-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🖼️ gallery - Gallery Server
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameter-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Parameter Details
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Parameter Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 Common Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glb-export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 GLB Export Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-visualization-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Feature Visualization Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-specific-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎬 Video-Specific Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colmap-specific-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📐 COLMAP-Specific Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💡 Usage Examples
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-basic-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1️⃣ Basic Workflow
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-using-auto-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        2️⃣ Using Auto Mode
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-multi-format-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        3️⃣ Multi-Format Export
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-advanced-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        4️⃣ Advanced Configuration
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-batch-processing-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        5️⃣ Batch Processing Workflow
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-web-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        6️⃣ Web Applications
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-transformer-feature-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        7️⃣ Transformer Feature Visualization
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📝 Notes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ❓ Getting Help
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+<h1 id="depth-anything-3-command-line-interface">🚀 Depth Anything 3 Command Line Interface<a class="headerlink" href="#depth-anything-3-command-line-interface" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Depth Anything 3 CLI provides a comprehensive command-line toolkit supporting image depth estimation, video processing, COLMAP dataset handling, and web applications.</p>
+<p>The backend service enables cache model to GPU so that we do not need to reload model for each command.</p>
+<h2 id="quick-start">⚡ Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<p>The CLI can run fully offline or connect to the backend for cached weights and task scheduling:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 🔧 Start backend service (optional, keeps model resident in GPU memory)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>da3<span class="w"> </span>backend<span class="w"> </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># 🚀 Use auto mode to process input</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>da3<span class="w"> </span>auto<span class="w"> </span>path/to/input<span class="w"> </span>--export-dir<span class="w"> </span>./workspace/scene001
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># ♻️ Reuse backend for next job</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>da3<span class="w"> </span>auto<span class="w"> </span>path/to/video.mp4<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span>--export-dir<span class="w"> </span>./workspace/scene002<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008
+</span></code></pre></div>
+<p>Each export directory contains <code>scene.glb</code>, <code>scene.jpg</code>, and optional extras such as <code>depth_vis/</code> or <code>gs_video/</code> depending on the requested format.</p>
+<h2 id="command-reference">📚 Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h2>
+<h3 id="auto-auto-mode">🤖 auto - Auto Mode<a class="headerlink" href="#auto-auto-mode" title="Permanent link">&para;</a></h3>
+<p>Automatically detect input type and dispatch to the appropriate handler.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>da3<span class="w"> </span>auto<span class="w"> </span>INPUT_PATH<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Input Type Detection:</strong>
+- 🖼️ Single image file (.jpg, .png, .jpeg, .webp, .bmp, .tiff, .tif)
+- 📁 Image directory
+- 🎬 Video file (.mp4, .avi, .mov, .mkv, .flv, .wmv, .webm, .m4v)
+- 📐 COLMAP directory (containing <code>images/</code> and <code>sparse/</code> subdirectories)</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INPUT_PATH</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Input path (image, directory, video, or COLMAP)</td>
+</tr>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Default model</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--export-dir</code></td>
+<td>str</td>
+<td><code>debug</code></td>
+<td>Export directory</td>
+</tr>
+<tr>
+<td><code>--export-format</code></td>
+<td>str</td>
+<td><code>glb</code></td>
+<td>Export format (supports <code>mini_npz</code>, <code>glb</code>, <code>feat_vis</code>, etc., can be combined with hyphens)</td>
+</tr>
+<tr>
+<td><code>--device</code></td>
+<td>str</td>
+<td><code>cuda</code></td>
+<td>Device to use</td>
+</tr>
+<tr>
+<td><code>--use-backend</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use backend service for inference</td>
+</tr>
+<tr>
+<td><code>--backend-url</code></td>
+<td>str</td>
+<td><code>http://localhost:8008</code></td>
+<td>Backend service URL</td>
+</tr>
+<tr>
+<td><code>--process-res</code></td>
+<td>int</td>
+<td><code>504</code></td>
+<td>Processing resolution</td>
+</tr>
+<tr>
+<td><code>--process-res-method</code></td>
+<td>str</td>
+<td><code>upper_bound_resize</code></td>
+<td>Processing resolution method</td>
+</tr>
+<tr>
+<td><code>--export-feat</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Export features from specified layers, comma-separated (e.g., <code>"0,1,2"</code>)</td>
+</tr>
+<tr>
+<td><code>--auto-cleanup</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Automatically clean export directory without confirmation</td>
+</tr>
+<tr>
+<td><code>--fps</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td><code>[Video]</code> Frame sampling FPS</td>
+</tr>
+<tr>
+<td><code>--sparse-subdir</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td><code>[COLMAP]</code> Sparse reconstruction subdirectory (e.g., <code>"0"</code> for <code>sparse/0/</code>)</td>
+</tr>
+<tr>
+<td><code>--align-to-input-ext-scale</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td><code>[COLMAP]</code> Align prediction to input extrinsics scale</td>
+</tr>
+<tr>
+<td><code>--use-ray-pose</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use ray-based pose estimation instead of camera decoder</td>
+</tr>
+<tr>
+<td><code>--ref-view-strategy</code></td>
+<td>str</td>
+<td><code>saddle_balanced</code></td>
+<td>Reference view selection strategy: <code>first</code>, <code>middle</code>, <code>saddle_balanced</code>, <code>saddle_sim_range</code>. See <a href="../funcs/ref_view_strategy/">docs</a></td>
+</tr>
+<tr>
+<td><code>--conf-thresh-percentile</code></td>
+<td>float</td>
+<td><code>40.0</code></td>
+<td><code>[GLB]</code> Lower percentile for adaptive confidence threshold</td>
+</tr>
+<tr>
+<td><code>--num-max-points</code></td>
+<td>int</td>
+<td><code>1000000</code></td>
+<td><code>[GLB]</code> Maximum number of points in the point cloud</td>
+</tr>
+<tr>
+<td><code>--show-cameras</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td><code>[GLB]</code> Show camera wireframes in the exported scene</td>
+</tr>
+<tr>
+<td><code>--feat-vis-fps</code></td>
+<td>int</td>
+<td><code>15</code></td>
+<td><code>[FEAT_VIS]</code> Frame rate for output video</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 🖼️ Auto-process an image</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>da3<span class="w"> </span>auto<span class="w"> </span>path/to/image.jpg<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># 🎬 Auto-process a video</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>da3<span class="w"> </span>auto<span class="w"> </span>path/to/video.mp4<span class="w"> </span>--fps<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># 🔧 Use backend service</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>da3<span class="w"> </span>auto<span class="w"> </span>path/to/input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span>--export-format<span class="w"> </span>mini_npz-glb<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span></code></pre></div>
+<hr />
+<h3 id="image-single-image-processing">🖼️ image - Single Image Processing<a class="headerlink" href="#image-single-image-processing" title="Permanent link">&para;</a></h3>
+<p>Process a single image for camera pose and depth estimation.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>da3<span class="w"> </span>image<span class="w"> </span>IMAGE_PATH<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IMAGE_PATH</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Input image file path</td>
+</tr>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Default model</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--export-dir</code></td>
+<td>str</td>
+<td><code>debug</code></td>
+<td>Export directory</td>
+</tr>
+<tr>
+<td><code>--export-format</code></td>
+<td>str</td>
+<td><code>glb</code></td>
+<td>Export format</td>
+</tr>
+<tr>
+<td><code>--device</code></td>
+<td>str</td>
+<td><code>cuda</code></td>
+<td>Device to use</td>
+</tr>
+<tr>
+<td><code>--use-backend</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use backend service for inference</td>
+</tr>
+<tr>
+<td><code>--backend-url</code></td>
+<td>str</td>
+<td><code>http://localhost:8008</code></td>
+<td>Backend service URL</td>
+</tr>
+<tr>
+<td><code>--process-res</code></td>
+<td>int</td>
+<td><code>504</code></td>
+<td>Processing resolution</td>
+</tr>
+<tr>
+<td><code>--process-res-method</code></td>
+<td>str</td>
+<td><code>upper_bound_resize</code></td>
+<td>Processing resolution method</td>
+</tr>
+<tr>
+<td><code>--export-feat</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Export feature layer indices (comma-separated)</td>
+</tr>
+<tr>
+<td><code>--auto-cleanup</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Automatically clean export directory</td>
+</tr>
+<tr>
+<td><code>--use-ray-pose</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use ray-based pose estimation instead of camera decoder</td>
+</tr>
+<tr>
+<td><code>--ref-view-strategy</code></td>
+<td>str</td>
+<td><code>saddle_balanced</code></td>
+<td>Reference view selection strategy. See <a href="../funcs/ref_view_strategy/">docs</a></td>
+</tr>
+<tr>
+<td><code>--conf-thresh-percentile</code></td>
+<td>float</td>
+<td><code>40.0</code></td>
+<td><code>[GLB]</code> Confidence threshold percentile</td>
+</tr>
+<tr>
+<td><code>--num-max-points</code></td>
+<td>int</td>
+<td><code>1000000</code></td>
+<td><code>[GLB]</code> Maximum number of points</td>
+</tr>
+<tr>
+<td><code>--show-cameras</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td><code>[GLB]</code> Show cameras</td>
+</tr>
+<tr>
+<td><code>--feat-vis-fps</code></td>
+<td>int</td>
+<td><code>15</code></td>
+<td><code>[FEAT_VIS]</code> Video frame rate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># ✨ Basic usage</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>da3<span class="w"> </span>image<span class="w"> </span>path/to/image.png<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># ⚡ With backend acceleration</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>da3<span class="w"> </span>image<span class="w"> </span>path/to/image.png<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1"># 🔍 Export feature visualization</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>da3<span class="w"> </span>image<span class="w"> </span>image.jpg<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span>--export-format<span class="w"> </span>feat_vis<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span>--export-feat<span class="w"> </span><span class="s2">&quot;9,19,29,39&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span>--export-dir<span class="w"> </span>./results
+</span></code></pre></div>
+<hr />
+<h3 id="images-image-directory-processing">🗂️ images - Image Directory Processing<a class="headerlink" href="#images-image-directory-processing" title="Permanent link">&para;</a></h3>
+<p>Process a directory of images for batch depth estimation.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>da3<span class="w"> </span>images<span class="w"> </span>IMAGES_DIR<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IMAGES_DIR</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Directory path containing images</td>
+</tr>
+<tr>
+<td><code>--image-extensions</code></td>
+<td>str</td>
+<td><code>png,jpg,jpeg</code></td>
+<td>Image file extensions to process (comma-separated)</td>
+</tr>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Default model</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--export-dir</code></td>
+<td>str</td>
+<td><code>debug</code></td>
+<td>Export directory</td>
+</tr>
+<tr>
+<td><code>--export-format</code></td>
+<td>str</td>
+<td><code>glb</code></td>
+<td>Export format</td>
+</tr>
+<tr>
+<td><code>--device</code></td>
+<td>str</td>
+<td><code>cuda</code></td>
+<td>Device to use</td>
+</tr>
+<tr>
+<td><code>--use-backend</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use backend service for inference</td>
+</tr>
+<tr>
+<td><code>--backend-url</code></td>
+<td>str</td>
+<td><code>http://localhost:8008</code></td>
+<td>Backend service URL</td>
+</tr>
+<tr>
+<td><code>--process-res</code></td>
+<td>int</td>
+<td><code>504</code></td>
+<td>Processing resolution</td>
+</tr>
+<tr>
+<td><code>--process-res-method</code></td>
+<td>str</td>
+<td><code>upper_bound_resize</code></td>
+<td>Processing resolution method</td>
+</tr>
+<tr>
+<td><code>--export-feat</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Export feature layer indices</td>
+</tr>
+<tr>
+<td><code>--auto-cleanup</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Automatically clean export directory</td>
+</tr>
+<tr>
+<td><code>--use-ray-pose</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use ray-based pose estimation instead of camera decoder</td>
+</tr>
+<tr>
+<td><code>--ref-view-strategy</code></td>
+<td>str</td>
+<td><code>saddle_balanced</code></td>
+<td>Reference view selection strategy. See <a href="../funcs/ref_view_strategy/">docs</a></td>
+</tr>
+<tr>
+<td><code>--conf-thresh-percentile</code></td>
+<td>float</td>
+<td><code>40.0</code></td>
+<td><code>[GLB]</code> Confidence threshold percentile</td>
+</tr>
+<tr>
+<td><code>--num-max-points</code></td>
+<td>int</td>
+<td><code>1000000</code></td>
+<td><code>[GLB]</code> Maximum number of points</td>
+</tr>
+<tr>
+<td><code>--show-cameras</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td><code>[GLB]</code> Show cameras</td>
+</tr>
+<tr>
+<td><code>--feat-vis-fps</code></td>
+<td>int</td>
+<td><code>15</code></td>
+<td><code>[FEAT_VIS]</code> Video frame rate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 📁 Process directory (defaults to png/jpg/jpeg)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>da3<span class="w"> </span>images<span class="w"> </span>./image_folder<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># 🎯 Custom extensions</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>da3<span class="w"> </span>images<span class="w"> </span>./dataset<span class="w"> </span>--image-extensions<span class="w"> </span><span class="s2">&quot;png,jpg,webp&quot;</span><span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># 🔧 Use backend service</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>da3<span class="w"> </span>images<span class="w"> </span>./dataset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span></code></pre></div>
+<hr />
+<h3 id="video-video-processing">🎬 video - Video Processing<a class="headerlink" href="#video-video-processing" title="Permanent link">&para;</a></h3>
+<p>Process video by extracting frames for depth estimation.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>da3<span class="w"> </span>video<span class="w"> </span>VIDEO_PATH<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VIDEO_PATH</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Input video file path</td>
+</tr>
+<tr>
+<td><code>--fps</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Frame extraction sampling FPS</td>
+</tr>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Default model</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--export-dir</code></td>
+<td>str</td>
+<td><code>debug</code></td>
+<td>Export directory</td>
+</tr>
+<tr>
+<td><code>--export-format</code></td>
+<td>str</td>
+<td><code>glb</code></td>
+<td>Export format</td>
+</tr>
+<tr>
+<td><code>--device</code></td>
+<td>str</td>
+<td><code>cuda</code></td>
+<td>Device to use</td>
+</tr>
+<tr>
+<td><code>--use-backend</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use backend service for inference</td>
+</tr>
+<tr>
+<td><code>--backend-url</code></td>
+<td>str</td>
+<td><code>http://localhost:8008</code></td>
+<td>Backend service URL</td>
+</tr>
+<tr>
+<td><code>--process-res</code></td>
+<td>int</td>
+<td><code>504</code></td>
+<td>Processing resolution</td>
+</tr>
+<tr>
+<td><code>--process-res-method</code></td>
+<td>str</td>
+<td><code>upper_bound_resize</code></td>
+<td>Processing resolution method</td>
+</tr>
+<tr>
+<td><code>--export-feat</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Export feature layer indices</td>
+</tr>
+<tr>
+<td><code>--auto-cleanup</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Automatically clean export directory</td>
+</tr>
+<tr>
+<td><code>--use-ray-pose</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use ray-based pose estimation instead of camera decoder</td>
+</tr>
+<tr>
+<td><code>--ref-view-strategy</code></td>
+<td>str</td>
+<td><code>saddle_balanced</code></td>
+<td>Reference view selection strategy. See <a href="../funcs/ref_view_strategy/">docs</a></td>
+</tr>
+<tr>
+<td><code>--conf-thresh-percentile</code></td>
+<td>float</td>
+<td><code>40.0</code></td>
+<td><code>[GLB]</code> Confidence threshold percentile</td>
+</tr>
+<tr>
+<td><code>--num-max-points</code></td>
+<td>int</td>
+<td><code>1000000</code></td>
+<td><code>[GLB]</code> Maximum number of points</td>
+</tr>
+<tr>
+<td><code>--show-cameras</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td><code>[GLB]</code> Show cameras</td>
+</tr>
+<tr>
+<td><code>--feat-vis-fps</code></td>
+<td>int</td>
+<td><code>15</code></td>
+<td><code>[FEAT_VIS]</code> Video frame rate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># ✨ Basic video processing</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>da3<span class="w"> </span>video<span class="w"> </span>path/to/video.mp4<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># ⚙️ Control frame sampling and resolution</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>da3<span class="w"> </span>video<span class="w"> </span>path/to/video.mp4<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span>--fps<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span>--process-res<span class="w"> </span><span class="m">1024</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1"># 🔧 Use backend service</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>da3<span class="w"> </span>video<span class="w"> </span>path/to/video.mp4<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span></code></pre></div>
+<hr />
+<h3 id="colmap-colmap-dataset-processing">📐 colmap - COLMAP Dataset Processing<a class="headerlink" href="#colmap-colmap-dataset-processing" title="Permanent link">&para;</a></h3>
+<p>Run pose-conditioned depth estimation on COLMAP data.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>da3<span class="w"> </span>colmap<span class="w"> </span>COLMAP_DIR<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COLMAP_DIR</code></td>
+<td>str</td>
+<td>Required</td>
+<td>COLMAP directory containing <code>images/</code> and <code>sparse/</code> subdirectories</td>
+</tr>
+<tr>
+<td><code>--sparse-subdir</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Sparse reconstruction subdirectory (e.g., <code>"0"</code> for <code>sparse/0/</code>)</td>
+</tr>
+<tr>
+<td><code>--align-to-input-ext-scale</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Align prediction to input extrinsics scale</td>
+</tr>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Default model</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--export-dir</code></td>
+<td>str</td>
+<td><code>debug</code></td>
+<td>Export directory</td>
+</tr>
+<tr>
+<td><code>--export-format</code></td>
+<td>str</td>
+<td><code>glb</code></td>
+<td>Export format</td>
+</tr>
+<tr>
+<td><code>--device</code></td>
+<td>str</td>
+<td><code>cuda</code></td>
+<td>Device to use</td>
+</tr>
+<tr>
+<td><code>--use-backend</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use backend service for inference</td>
+</tr>
+<tr>
+<td><code>--backend-url</code></td>
+<td>str</td>
+<td><code>http://localhost:8008</code></td>
+<td>Backend service URL</td>
+</tr>
+<tr>
+<td><code>--process-res</code></td>
+<td>int</td>
+<td><code>504</code></td>
+<td>Processing resolution</td>
+</tr>
+<tr>
+<td><code>--process-res-method</code></td>
+<td>str</td>
+<td><code>upper_bound_resize</code></td>
+<td>Processing resolution method</td>
+</tr>
+<tr>
+<td><code>--export-feat</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Export feature layer indices</td>
+</tr>
+<tr>
+<td><code>--auto-cleanup</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Automatically clean export directory</td>
+</tr>
+<tr>
+<td><code>--use-ray-pose</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use ray-based pose estimation instead of camera decoder</td>
+</tr>
+<tr>
+<td><code>--ref-view-strategy</code></td>
+<td>str</td>
+<td><code>saddle_balanced</code></td>
+<td>Reference view selection strategy. See <a href="../funcs/ref_view_strategy/">docs</a></td>
+</tr>
+<tr>
+<td><code>--conf-thresh-percentile</code></td>
+<td>float</td>
+<td><code>40.0</code></td>
+<td><code>[GLB]</code> Confidence threshold percentile</td>
+</tr>
+<tr>
+<td><code>--num-max-points</code></td>
+<td>int</td>
+<td><code>1000000</code></td>
+<td><code>[GLB]</code> Maximum number of points</td>
+</tr>
+<tr>
+<td><code>--show-cameras</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td><code>[GLB]</code> Show cameras</td>
+</tr>
+<tr>
+<td><code>--feat-vis-fps</code></td>
+<td>int</td>
+<td><code>15</code></td>
+<td><code>[FEAT_VIS]</code> Video frame rate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 📐 Process COLMAP dataset</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>da3<span class="w"> </span>colmap<span class="w"> </span>./colmap_dataset<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># 🎯 Use specific sparse subdirectory and align scale</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>da3<span class="w"> </span>colmap<span class="w"> </span>./colmap_dataset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span>--sparse-subdir<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span>--align-to-input-ext-scale<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># 🔧 Use backend service</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>da3<span class="w"> </span>colmap<span class="w"> </span>./colmap_dataset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span></code></pre></div>
+<hr />
+<h3 id="backend-backend-service">🔧 backend - Backend Service<a class="headerlink" href="#backend-backend-service" title="Permanent link">&para;</a></h3>
+<p>Start model backend service with integrated gallery.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>da3<span class="w"> </span>backend<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Default model</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--device</code></td>
+<td>str</td>
+<td><code>cuda</code></td>
+<td>Device to use</td>
+</tr>
+<tr>
+<td><code>--host</code></td>
+<td>str</td>
+<td><code>127.0.0.1</code></td>
+<td>Host address to bind to</td>
+</tr>
+<tr>
+<td><code>--port</code></td>
+<td>int</td>
+<td><code>8008</code></td>
+<td>Port number to bind to</td>
+</tr>
+<tr>
+<td><code>--gallery-dir</code></td>
+<td>str</td>
+<td>Default gallery dir</td>
+<td>Gallery directory path (optional)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Features:</strong>
+- 🎯 Keeps model resident in GPU memory
+- 🔌 Provides REST inference API
+- 📊 Integrated dashboard and status monitoring
+- 🖼️ Optional gallery browser (if <code>--gallery-dir</code> is provided)</p>
+<p><strong>Available Endpoints:</strong>
+- 🏠 <code>/</code> - Home page
+- 📊 <code>/dashboard</code> - Dashboard
+- ✅ <code>/status</code> - API status
+- 🖼️ <code>/gallery/</code> - Gallery browser (if enabled)</p>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 🚀 Basic backend service</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>da3<span class="w"> </span>backend<span class="w"> </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># 🖼️ Backend with gallery</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>da3<span class="w"> </span>backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span>--device<span class="w"> </span>cuda<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span>--port<span class="w"> </span><span class="m">8008</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./workspace
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="c1"># 💻 Use CPU</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>da3<span class="w"> </span>backend<span class="w"> </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span>--device<span class="w"> </span>cpu
+</span></code></pre></div>
+<hr />
+<h3 id="gradio-gradio-application">🎨 gradio - Gradio Application<a class="headerlink" href="#gradio-gradio-application" title="Permanent link">&para;</a></h3>
+<p>Launch Depth Anything 3 Gradio interactive web application.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>da3<span class="w"> </span>gradio<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--model-dir</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Model directory path</td>
+</tr>
+<tr>
+<td><code>--workspace-dir</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Workspace directory path</td>
+</tr>
+<tr>
+<td><code>--gallery-dir</code></td>
+<td>str</td>
+<td>Required</td>
+<td>Gallery directory path</td>
+</tr>
+<tr>
+<td><code>--host</code></td>
+<td>str</td>
+<td><code>127.0.0.1</code></td>
+<td>Host address to bind to</td>
+</tr>
+<tr>
+<td><code>--port</code></td>
+<td>int</td>
+<td><code>7860</code></td>
+<td>Port number to bind to</td>
+</tr>
+<tr>
+<td><code>--share</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Create a public link</td>
+</tr>
+<tr>
+<td><code>--debug</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable debug mode</td>
+</tr>
+<tr>
+<td><code>--cache-examples</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Pre-cache all example scenes at startup</td>
+</tr>
+<tr>
+<td><code>--cache-gs-tag</code></td>
+<td>str</td>
+<td><code>""</code></td>
+<td>Tag to match scene names for high-res+3DGS caching</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># 🎨 Basic Gradio application</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>da3<span class="w"> </span>gradio<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span>--workspace-dir<span class="w"> </span>./workspace<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./gallery
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># 🌐 Enable sharing and debug</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>da3<span class="w"> </span>gradio<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span>--workspace-dir<span class="w"> </span>./workspace<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./gallery<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span>--share<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span>--debug
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>
+</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="c1"># ⚡ Pre-cache examples</span>
+</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>da3<span class="w"> </span>gradio<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="w">    </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="w">    </span>--workspace-dir<span class="w"> </span>./workspace<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./gallery<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="w">    </span>--cache-examples<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-21"><a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a><span class="w">    </span>--cache-gs-tag<span class="w"> </span><span class="s2">&quot;dl3dv&quot;</span>
+</span></code></pre></div>
+<hr />
+<h3 id="gallery-gallery-server">🖼️ gallery - Gallery Server<a class="headerlink" href="#gallery-gallery-server" title="Permanent link">&para;</a></h3>
+<p>Launch standalone Depth Anything 3 Gallery server.</p>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>da3<span class="w"> </span>gallery<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--gallery-dir</code></td>
+<td>str</td>
+<td>Default gallery dir</td>
+<td>Gallery root directory</td>
+</tr>
+<tr>
+<td><code>--host</code></td>
+<td>str</td>
+<td><code>127.0.0.1</code></td>
+<td>Host address to bind to</td>
+</tr>
+<tr>
+<td><code>--port</code></td>
+<td>int</td>
+<td><code>8007</code></td>
+<td>Port number to bind to</td>
+</tr>
+<tr>
+<td><code>--open-browser</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Open browser after launch</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong>
+The gallery expects each scene folder to contain at least <code>scene.glb</code> and <code>scene.jpg</code>, with optional subfolders such as <code>depth_vis/</code> or <code>gs_video/</code>.</p>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 🖼️ Basic gallery server</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>da3<span class="w"> </span>gallery<span class="w"> </span>--gallery-dir<span class="w"> </span>./workspace
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># 🌐 Custom host and port</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>da3<span class="w"> </span>gallery<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./workspace<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span>--port<span class="w"> </span><span class="m">8007</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="c1"># 🚀 Auto-open browser</span>
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>da3<span class="w"> </span>gallery<span class="w"> </span>--gallery-dir<span class="w"> </span>./workspace<span class="w"> </span>--open-browser
+</span></code></pre></div>
+<hr />
+<h2 id="parameter-details">⚙️ Parameter Details<a class="headerlink" href="#parameter-details" title="Permanent link">&para;</a></h2>
+<h3 id="common-parameters">🔧 Common Parameters<a class="headerlink" href="#common-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>--export-dir</code></strong>: Output directory, defaults to <code>debug</code></li>
+<li><strong><code>--export-format</code></strong>: Export format, supports combining multiple formats with hyphens:</li>
+<li>📦 <code>mini_npz</code>: Compressed NumPy format</li>
+<li>🎨 <code>glb</code>: glTF binary format (3D scene)</li>
+<li>🔍 <code>feat_vis</code>: Feature visualization</li>
+<li>
+<p>Example: <code>mini_npz-glb</code> exports both formats</p>
+</li>
+<li>
+<p><strong><code>--process-res</code></strong> / <strong><code>--process-res-method</code></strong>: Control preprocessing resolution strategy</p>
+</li>
+<li><code>process-res</code>: Target resolution (default 504)</li>
+<li>
+<p><code>process-res-method</code>: Resize method (default <code>upper_bound_resize</code>)</p>
+</li>
+<li>
+<p><strong><code>--auto-cleanup</code></strong>: Remove existing export directory without confirmation</p>
+</li>
+<li>
+<p><strong><code>--use-backend</code></strong> / <strong><code>--backend-url</code></strong>: Reuse running backend service</p>
+</li>
+<li>⚡ Reduces model loading time</li>
+<li>
+<p>🌐 Supports distributed processing</p>
+</li>
+<li>
+<p><strong><code>--export-feat</code></strong>: Layer indices for exporting intermediate features (comma-separated)</p>
+</li>
+<li>Example: <code>"9,19,29,39"</code></li>
+</ul>
+<h3 id="glb-export-parameters">🎨 GLB Export Parameters<a class="headerlink" href="#glb-export-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>--conf-thresh-percentile</code></strong>: Lower percentile for adaptive confidence threshold (default 40.0)</li>
+<li>
+<p>Used to filter low-confidence points</p>
+</li>
+<li>
+<p><strong><code>--num-max-points</code></strong>: Maximum number of points in point cloud (default 1,000,000)</p>
+</li>
+<li>
+<p>Controls output file size and performance</p>
+</li>
+<li>
+<p><strong><code>--show-cameras</code></strong>: Show camera wireframes in exported scene (default True)</p>
+</li>
+</ul>
+<h3 id="feature-visualization-parameters">🔍 Feature Visualization Parameters<a class="headerlink" href="#feature-visualization-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>--feat-vis-fps</code></strong>: Frame rate for feature visualization output video (default 15)</li>
+</ul>
+<h3 id="video-specific-parameters">🎬 Video-Specific Parameters<a class="headerlink" href="#video-specific-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>--fps</code></strong>: Video frame extraction sampling rate (default 1.0 FPS)</li>
+<li>Higher values extract more frames</li>
+</ul>
+<h3 id="colmap-specific-parameters">📐 COLMAP-Specific Parameters<a class="headerlink" href="#colmap-specific-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>--sparse-subdir</code></strong>: Sparse reconstruction subdirectory</li>
+<li>Empty string uses <code>sparse/</code> directory</li>
+<li>
+<p><code>"0"</code> uses <code>sparse/0/</code> directory</p>
+</li>
+<li>
+<p><strong><code>--align-to-input-ext-scale</code></strong>: Align prediction to input extrinsics scale (default True)</p>
+</li>
+<li>Ensures depth estimation is consistent with COLMAP scale</li>
+</ul>
+<hr />
+<h2 id="usage-examples">💡 Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<h3 id="1-basic-workflow">1️⃣ Basic Workflow<a class="headerlink" href="#1-basic-workflow" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># 🔧 Start backend service</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>da3<span class="w"> </span>backend<span class="w"> </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8008</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1"># 🖼️ Process single image</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>da3<span class="w"> </span>image<span class="w"> </span>image.jpg<span class="w"> </span>--export-dir<span class="w"> </span>./output1<span class="w"> </span>--use-backend
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="c1"># 🎬 Process video</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>da3<span class="w"> </span>video<span class="w"> </span>video.mp4<span class="w"> </span>--fps<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--export-dir<span class="w"> </span>./output2<span class="w"> </span>--use-backend
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="c1"># 📐 Process COLMAP dataset</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>da3<span class="w"> </span>colmap<span class="w"> </span>./colmap_data<span class="w"> </span>--export-dir<span class="w"> </span>./output3<span class="w"> </span>--use-backend
+</span></code></pre></div>
+<h3 id="2-using-auto-mode">2️⃣ Using Auto Mode<a class="headerlink" href="#2-using-auto-mode" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># 🤖 Auto-detect and process</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>da3<span class="w"> </span>auto<span class="w"> </span>./unknown_input<span class="w"> </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># ⚡ With backend acceleration</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>da3<span class="w"> </span>auto<span class="w"> </span>./unknown_input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">    </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">    </span>--backend-url<span class="w"> </span>http://localhost:8008<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span></code></pre></div>
+<h3 id="3-multi-format-export">3️⃣ Multi-Format Export<a class="headerlink" href="#3-multi-format-export" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># 📦 Export both NPZ and GLB formats</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>da3<span class="w"> </span>auto<span class="w"> </span>assets/examples/SOH<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span>--export-format<span class="w"> </span>mini_npz-glb<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span>--export-dir<span class="w"> </span>./workspace/soh
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># 🔍 Export feature visualization</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>da3<span class="w"> </span>image<span class="w"> </span>image.jpg<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">    </span>--export-format<span class="w"> </span>feat_vis<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span>--export-feat<span class="w"> </span><span class="s2">&quot;9,19,29,39&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">    </span>--export-dir<span class="w"> </span>./results
+</span></code></pre></div>
+<h3 id="4-advanced-configuration">4️⃣ Advanced Configuration<a class="headerlink" href="#4-advanced-configuration" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># ⚙️ Custom resolution and point cloud density</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>da3<span class="w"> </span>image<span class="w"> </span>image.jpg<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">    </span>--process-res<span class="w"> </span><span class="m">1024</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span>--num-max-points<span class="w"> </span><span class="m">2000000</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">    </span>--conf-thresh-percentile<span class="w"> </span><span class="m">30</span>.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="c1"># 📐 COLMAP advanced options</span>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>da3<span class="w"> </span>colmap<span class="w"> </span>./colmap_data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">    </span>--sparse-subdir<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">    </span>--align-to-input-ext-scale<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">    </span>--process-res<span class="w"> </span><span class="m">756</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="w">    </span>--export-dir<span class="w"> </span>./output
+</span></code></pre></div>
+<h3 id="5-batch-processing-workflow">5️⃣ Batch Processing Workflow<a class="headerlink" href="#5-batch-processing-workflow" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># 🔧 Start backend</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>da3<span class="w"> </span>backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">    </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span>--device<span class="w"> </span>cuda<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">    </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span>--port<span class="w"> </span><span class="m">8008</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./workspace
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="c1"># 🔄 Batch process multiple scenes</span>
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="k">for</span><span class="w"> </span>scene<span class="w"> </span><span class="k">in</span><span class="w"> </span>scene1<span class="w"> </span>scene2<span class="w"> </span>scene3<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">    </span>da3<span class="w"> </span>auto<span class="w"> </span>./data/<span class="nv">$scene</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">        </span>--export-dir<span class="w"> </span>./workspace/<span class="nv">$scene</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">        </span>--use-backend<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">        </span>--auto-cleanup
+</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="k">done</span>
+</span><span id="__span-21-16"><a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>
+</span><span id="__span-21-17"><a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="c1"># 🖼️ Launch gallery to view results</span>
+</span><span id="__span-21-18"><a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>da3<span class="w"> </span>gallery<span class="w"> </span>--gallery-dir<span class="w"> </span>./workspace<span class="w"> </span>--open-browser
+</span></code></pre></div>
+<h3 id="6-web-applications">6️⃣ Web Applications<a class="headerlink" href="#6-web-applications" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># 🎨 Launch Gradio application</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>da3<span class="w"> </span>gradio<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span>--model-dir<span class="w"> </span>depth-anything/DA3NESTED-GIANT-LARGE<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span>--workspace-dir<span class="w"> </span>workspace/gradio<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span>--gallery-dir<span class="w"> </span>./gallery<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">    </span>--port<span class="w"> </span><span class="m">7860</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">    </span>--share
+</span></code></pre></div>
+<h3 id="7-transformer-feature-visualization">7️⃣ Transformer Feature Visualization<a class="headerlink" href="#7-transformer-feature-visualization" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># 🔍 Export Transformer features</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="c1"># 📦 Combined with numerical output</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>da3<span class="w"> </span>auto<span class="w"> </span>video.mp4<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span>--export-format<span class="w"> </span>glb-feat_vis<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span>--export-feat<span class="w"> </span><span class="s2">&quot;11,21,31&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span>--export-dir<span class="w"> </span>./debug<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">    </span>--use-backend
+</span></code></pre></div>
+<hr />
+<h2 id="notes">📝 Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>🔧 Backend Service</strong>: Recommended for processing multiple tasks to improve efficiency</li>
+<li><strong>💾 GPU Memory</strong>: Be mindful of GPU memory usage when processing high-resolution inputs</li>
+<li><strong>📁 Export Directory</strong>: Use <code>--auto-cleanup</code> to avoid manual confirmation for deletion</li>
+<li><strong>🔀 Format Combination</strong>: Multiple export formats can be combined with hyphens (e.g., <code>mini_npz-glb-feat_vis</code>)</li>
+<li><strong>📐 COLMAP Data</strong>: Ensure COLMAP directory structure is correct (contains <code>images/</code> and <code>sparse/</code> subdirectories)</li>
+</ol>
+<hr />
+<h2 id="getting-help">❓ Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<p>View detailed help for any command:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># 📖 View main help</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>da3<span class="w"> </span>--help
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="c1"># 🔍 View specific command help</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>da3<span class="w"> </span>auto<span class="w"> </span>--help
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>da3<span class="w"> </span>image<span class="w"> </span>--help
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>da3<span class="w"> </span>backend<span class="w"> </span>--help
+</span></code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../operation-guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Operation Guide">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Operation Guide
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../API/" class="md-footer__link md-footer__link--next" aria-label="Next: DA3 API Reference">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                DA3 API Reference
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Wong Wei Ming, Shao Ying Zhan, Dana Yak &mdash; HKUST COMP4471
+
+    </div>
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["announce.dismiss","content.code.annotate","content.code.copy","content.code.select","content.footnote.tooltips","content.tabs.link","content.tooltips","navigation.footer","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.path","navigation.sections","navigation.top","navigation.tracking","search.highlight"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      
+    
+  </body>
+</html>

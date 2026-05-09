@@ -1,0 +1,1613 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LoRA fine-tuning of Depth Anything 3 for underwater AUV depth estimation — dataset, training, evaluation, and HPC workflow.">
+      
+      
+        <meta name="author" content="Wong Wei Ming, Shao Ying Zhan, Dana Yak">
+      
+      
+      
+        <link rel="prev" href="../dataset/">
+      
+      
+        <link rel="next" href="../operation-guide/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.40">
+    
+    
+      
+        <title>🔬 Implementation - Underwater DA3 Docs</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#implementation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="Underwater DA3 Docs" class="md-header__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Underwater DA3 Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🔬 Implementation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="Underwater DA3 Docs" class="md-nav__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    Underwater DA3 Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Quick Start
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Dataset
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Implementation
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Implementation
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traindatasetpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/dataset.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;dataset.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unitydepthdataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>UnityDepthDataset</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mimirseafloordataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>MIMIRSeaFloorDataset</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trainlorapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/lora.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;lora.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loralinear" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>LoRALinear</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Key Functions
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trainable-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Trainable Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trainlossespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/losses.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;losses.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#silogloss" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>SILogLoss</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gradientloss" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>GradientLoss</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#underwaterdepthloss" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>UnderwaterDepthLoss</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traintrainpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/train.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;train.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-it-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What It Does
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Key Arguments
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-configuration-used-for-published-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Training Configuration (Used for Published Checkpoint)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trainevaluatepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/evaluate.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;evaluate.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-computed" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Metrics Computed
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Outputs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traindemo_evalpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/demo_eval.py</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traintest_lora_pipelinepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/test_lora_pipeline.py</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#srcdepth_anything_3-upstream-da3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>src/depth_anything_3/</code> (upstream DA3)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operation Guide
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 CLI Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 API Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BENCHMARK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 Benchmark
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traindatasetpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/dataset.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;dataset.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unitydepthdataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>UnityDepthDataset</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mimirseafloordataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>MIMIRSeaFloorDataset</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trainlorapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/lora.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;lora.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loralinear" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>LoRALinear</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Key Functions
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trainable-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Trainable Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trainlossespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/losses.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;losses.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#silogloss" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>SILogLoss</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gradientloss" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>GradientLoss</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#underwaterdepthloss" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>UnderwaterDepthLoss</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traintrainpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/train.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;train.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-it-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What It Does
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Key Arguments
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-configuration-used-for-published-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Training Configuration (Used for Published Checkpoint)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trainevaluatepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/evaluate.py</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="train&#x2f;evaluate.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-computed" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Metrics Computed
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Outputs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traindemo_evalpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/demo_eval.py</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traintest_lora_pipelinepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>train/test_lora_pipeline.py</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#srcdepth_anything_3-upstream-da3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>src/depth_anything_3/</code> (upstream DA3)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+<h1 id="implementation">🔬 Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h1>
+<p>What every file in the <code>train/</code> directory implements, and how the components fit together.</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>train/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── dataset.py             # data loading + preprocessing
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── lora.py                # LoRA adapter injection
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── losses.py              # training objective
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── train.py               # main training loop
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├── evaluate.py            # offline benchmarking
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── demo_eval.py           # live visualisation demo
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>└── test_lora_pipeline.py  # smoke test (no data needed)
+</span></code></pre></div>
+<hr />
+<h2 id="traindatasetpy"><code>train/dataset.py</code><a class="headerlink" href="#traindatasetpy" title="Permanent link">&para;</a></h2>
+<p>Loads MIMIR-UW RGB+depth pairs and applies physics-aware preprocessing.</p>
+<h3 id="unitydepthdataset"><code>UnityDepthDataset</code><a class="headerlink" href="#unitydepthdataset" title="Permanent link">&para;</a></h3>
+<p>Training dataset for the SeaFloor Algae environment (NPY inverse-depth files).</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__()</code></td>
+<td>Scans <code>rgb/</code> and <code>depth/</code> subdirs, builds paired file list, applies 80/20 split at seed 42</td>
+</tr>
+<tr>
+<td><code>_load_depth()</code></td>
+<td>Loads <code>.npy</code> as float32 inverse-depth → inverts to metres; or <code>.png</code> uint16 ÷ 1000</td>
+</tr>
+<tr>
+<td><code>__getitem__()</code></td>
+<td>Loads pair → gray world WB → histogram stretch → resize to 518×518 → ImageNet normalise → depth clip to (0, max_depth] → tensors</td>
+</tr>
+<tr>
+<td><code>gray_world_white_balance()</code></td>
+<td>Per-channel multiplicative scaling to equalise channel means</td>
+</tr>
+<tr>
+<td><code>histogram_stretch()</code></td>
+<td>Per-channel 2<sup>nd</sup>–98<sup>th</sup> percentile linear stretch</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mimirseafloordataset"><code>MIMIRSeaFloorDataset</code><a class="headerlink" href="#mimirseafloordataset" title="Permanent link">&para;</a></h3>
+<p>Benchmark dataset for the held-out SeaFloor environment (EXR inverse-depth, multi-track/multi-cam layout).</p>
+<p>Walks <code>root/track*/auv0/rgb/cam{0,1}/data/*.png</code> and corresponding EXR depth files. Applies the same preprocessing pipeline as <code>UnityDepthDataset</code>.</p>
+<hr />
+<h2 id="trainlorapy"><code>train/lora.py</code><a class="headerlink" href="#trainlorapy" title="Permanent link">&para;</a></h2>
+<p>Injects LoRA adapters into the DINOv2-L backbone.</p>
+<h3 id="loralinear"><code>LoRALinear</code><a class="headerlink" href="#loralinear" title="Permanent link">&para;</a></h3>
+<p>Drop-in <code>nn.Linear</code> replacement that adds a low-rank side-path:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>output = W_frozen(x) + B(A(x)) * (alpha / rank)
+</span></code></pre></div>
+<ul>
+<li><code>lora_A</code>: <code>(in_features, rank)</code> — initialised kaiming uniform</li>
+<li><code>lora_B</code>: <code>(rank, out_features)</code> — initialised zeros (delta = 0 at init)</li>
+<li><code>base.weight</code> and <code>base.bias</code> are frozen (<code>.requires_grad_(False)</code>)</li>
+</ul>
+<h3 id="key-functions">Key Functions<a class="headerlink" href="#key-functions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>inject_lora(model, rank=8, alpha=16.0)</code></td>
+<td>Walks all <code>Attention</code> blocks in the DINOv2 backbone and replaces <code>qkv</code> and <code>proj</code> Linear layers with <code>LoRALinear</code></td>
+</tr>
+<tr>
+<td><code>freeze_backbone(model)</code></td>
+<td>Freezes all backbone parameters except <code>lora_A</code> and <code>lora_B</code> matrices; DPT prediction head stays fully trainable</td>
+</tr>
+<tr>
+<td><code>count_trainable(model)</code></td>
+<td>Returns <code>(trainable_params, total_params)</code> — expect ~9.24% trainable</td>
+</tr>
+<tr>
+<td><code>merge_lora_weights(model)</code></td>
+<td>Bakes <code>B @ A * scaling</code> into the base weight matrix in-place — produces a plain <code>nn.Linear</code> for TensorRT export</td>
+</tr>
+</tbody>
+</table>
+<h3 id="trainable-parameters">Trainable Parameters<a class="headerlink" href="#trainable-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Params</th>
+<th>Trainable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DINOv2-L backbone</td>
+<td>~300M</td>
+<td>LoRA A+B only (~3M, ~1%)</td>
+</tr>
+<tr>
+<td>DPT prediction head</td>
+<td>~25M</td>
+<td>✅ Fully trainable (~8.24%)</td>
+</tr>
+<tr>
+<td><strong>Total trainable</strong></td>
+<td></td>
+<td><strong>~9.24%</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="trainlossespy"><code>train/losses.py</code><a class="headerlink" href="#trainlossespy" title="Permanent link">&para;</a></h2>
+<h3 id="silogloss"><code>SILogLoss</code><a class="headerlink" href="#silogloss" title="Permanent link">&para;</a></h3>
+<p>Scale-Invariant Log loss (Eigen et al., 2014) with a scale anchor term:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>g_i = log(pred_i) - log(gt_i)
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>L_silog = mean(g²) - 0.85 * mean(g)² + 0.1 * |mean(g)|
+</span></code></pre></div>
+<p>The third term (<code>scale_weight=0.1</code>) is a <strong>scale anchor penalty</strong>. Without it, the variance-focus term <code>0.85 * mean(g)²</code> cancels the global scale penalty, allowing the model to learn arbitrary depth scale offsets while SILog stays low — AbsRel diverges. The scale anchor was added specifically to fix training instability observed at <code>lr=1e-4</code>.</p>
+<h3 id="gradientloss"><code>GradientLoss</code><a class="headerlink" href="#gradientloss" title="Permanent link">&para;</a></h3>
+<p>L1 loss on Sobel-filtered depth maps to enforce edge sharpness:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>L_grad = mean(|∇x_pred - ∇x_gt| + |∇y_pred - ∇y_gt|)
+</span></code></pre></div>
+<p>Sobel kernels are registered as non-trainable buffers.</p>
+<h3 id="underwaterdepthloss"><code>UnderwaterDepthLoss</code><a class="headerlink" href="#underwaterdepthloss" title="Permanent link">&para;</a></h3>
+<p>Combined objective:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>L = L_silog + 0.5 * L_grad
+</span></code></pre></div>
+<p>Returns a dict with keys <code>loss</code>, <code>silog</code>, <code>grad</code> for TensorBoard logging.</p>
+<hr />
+<h2 id="traintrainpy"><code>train/train.py</code><a class="headerlink" href="#traintrainpy" title="Permanent link">&para;</a></h2>
+<p>Main training loop.</p>
+<h3 id="what-it-does">What It Does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Loads <code>da3metric-large</code> from HuggingFace</li>
+<li>Calls <code>inject_lora()</code> then <code>freeze_backbone()</code>, moves model to GPU</li>
+<li>Builds <code>UnityDepthDataset</code> train/val splits</li>
+<li>Trains with AdamW + CosineAnnealingLR for N epochs</li>
+<li>After each epoch: validates, logs to TensorBoard, saves <code>best.pth</code> and <code>last.pth</code></li>
+<li>Supports <code>--resume checkpoints/last.pth</code> for HPC job continuation</li>
+</ol>
+<h3 id="key-arguments">Key Arguments<a class="headerlink" href="#key-arguments" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--data_root</code></td>
+<td>—</td>
+<td>Path to directory with <code>rgb/</code> and <code>depth/</code> subdirs</td>
+</tr>
+<tr>
+<td><code>--model_name</code></td>
+<td><code>da3metric-large</code></td>
+<td>DA3 config name</td>
+</tr>
+<tr>
+<td><code>--epochs</code></td>
+<td><code>30</code></td>
+<td>Total training epochs</td>
+</tr>
+<tr>
+<td><code>--batch_size</code></td>
+<td><code>16</code></td>
+<td>Batch size (A100 40GB handles 16 @ 518×518)</td>
+</tr>
+<tr>
+<td><code>--lr</code></td>
+<td><code>2e-5</code></td>
+<td>Initial learning rate</td>
+</tr>
+<tr>
+<td><code>--lora_rank</code></td>
+<td><code>8</code></td>
+<td>LoRA rank</td>
+</tr>
+<tr>
+<td><code>--lora_alpha</code></td>
+<td><code>16.0</code></td>
+<td>LoRA alpha (scaling = alpha/rank = 2.0)</td>
+</tr>
+<tr>
+<td><code>--weight_decay</code></td>
+<td><code>1e-4</code></td>
+<td>AdamW weight decay</td>
+</tr>
+<tr>
+<td><code>--grad_clip</code></td>
+<td><code>1.0</code></td>
+<td>Max gradient norm</td>
+</tr>
+<tr>
+<td><code>--ckpt_dir</code></td>
+<td><code>checkpoints/</code></td>
+<td>Checkpoint output directory</td>
+</tr>
+<tr>
+<td><code>--resume</code></td>
+<td><code>None</code></td>
+<td>Path to checkpoint to resume from</td>
+</tr>
+</tbody>
+</table>
+<h3 id="training-configuration-used-for-published-checkpoint">Training Configuration (Used for Published Checkpoint)<a class="headerlink" href="#training-configuration-used-for-published-checkpoint" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Hyperparameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Epochs</td>
+<td>30</td>
+</tr>
+<tr>
+<td>Batch size</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Learning rate</td>
+<td>2e-5</td>
+</tr>
+<tr>
+<td>LR schedule</td>
+<td>Cosine annealing → 1e-6</td>
+</tr>
+<tr>
+<td>Optimizer</td>
+<td>AdamW, weight_decay=1e-4</td>
+</tr>
+<tr>
+<td>Gradient clip</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Loss</td>
+<td>SILog (scale_weight=0.1) + 0.5 × Sobel gradient</td>
+</tr>
+<tr>
+<td>Best epoch</td>
+<td>27</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="trainevaluatepy"><code>train/evaluate.py</code><a class="headerlink" href="#trainevaluatepy" title="Permanent link">&para;</a></h2>
+<p>Offline benchmarking against MIMIR-UW SeaFloor.</p>
+<h3 id="metrics-computed">Metrics Computed<a class="headerlink" href="#metrics-computed" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula</th>
+<th>Better</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AbsRel</td>
+<td>mean(|pred−gt| / gt)</td>
+<td>↓</td>
+</tr>
+<tr>
+<td>SqRel</td>
+<td>mean((pred−gt)² / gt)</td>
+<td>↓</td>
+</tr>
+<tr>
+<td>RMSE</td>
+<td>√mean((pred−gt)²)</td>
+<td>↓</td>
+</tr>
+<tr>
+<td>RMSE_log</td>
+<td>√mean((log pred − log gt)²)</td>
+<td>↓</td>
+</tr>
+<tr>
+<td>δ&lt;1.25</td>
+<td>% pixels where max(pred/gt, gt/pred) &lt; 1.25</td>
+<td>↑</td>
+</tr>
+<tr>
+<td>δ&lt;1.25²</td>
+<td>same with threshold 1.5625</td>
+<td>↑</td>
+</tr>
+<tr>
+<td>δ&lt;1.25³</td>
+<td>same with threshold 1.953</td>
+<td>↑</td>
+</tr>
+</tbody>
+</table>
+<h3 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Output</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--out_json</code></td>
+<td>Aggregate metrics across all frames</td>
+</tr>
+<tr>
+<td><code>--per_image_csv</code></td>
+<td>Per-frame metrics — sort by AbsRel to find worst cases</td>
+</tr>
+<tr>
+<td><code>--vis_dir</code></td>
+<td>30 sampled four-panel figures: RGB | predicted depth | GT depth | abs-rel error map</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="traindemo_evalpy"><code>train/demo_eval.py</code><a class="headerlink" href="#traindemo_evalpy" title="Permanent link">&para;</a></h2>
+<p>Live matplotlib evaluation demo — updates a figure window as evaluation proceeds. Useful for presentations.</p>
+<p><strong>Layout (dark theme, 28×14 figure):</strong>
+- <strong>Top row:</strong> RGB input | Predicted depth (plasma) | GT depth (plasma) | Abs-rel error (hot)
+- <strong>Bottom row:</strong> AbsRel, RMSE, δ&lt;1.25 running charts | Summary stats box</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--stride</code></td>
+<td><code>1</code></td>
+<td>Evaluate every Nth sample (<code>10</code> → ~3 min for full benchmark)</td>
+</tr>
+<tr>
+<td><code>--update_every</code></td>
+<td><code>10</code></td>
+<td>Refresh window every N batches</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="traintest_lora_pipelinepy"><code>train/test_lora_pipeline.py</code><a class="headerlink" href="#traintest_lora_pipelinepy" title="Permanent link">&para;</a></h2>
+<p>Five-step smoke test using random dummy data — no dataset or HuggingFace access required:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 — Load model</td>
+<td>DA3 loads from HuggingFace without errors</td>
+</tr>
+<tr>
+<td>2 — Inject LoRA</td>
+<td>LoRA wraps qkv+proj in all attention blocks; correct % trainable</td>
+</tr>
+<tr>
+<td>3 — Forward pass</td>
+<td>Model runs on (2, 3, 518, 518) dummy input; output shape is (2, 518, 518)</td>
+</tr>
+<tr>
+<td>4 — Backward pass</td>
+<td>Gradients flow through LoRA A+B; optimizer step runs</td>
+</tr>
+<tr>
+<td>5 — Checkpoint</td>
+<td><code>state_dict</code> saves and reloads with LoRA weights intact</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="srcdepth_anything_3-upstream-da3"><code>src/depth_anything_3/</code> (upstream DA3)<a class="headerlink" href="#srcdepth_anything_3-upstream-da3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model/da3.py</code> — <code>DepthAnything3Net</code></td>
+<td>Top-level model: DINOv2-L encoder + DPT/DualDPT decoder</td>
+</tr>
+<tr>
+<td><code>model/dinov2/dinov2.py</code></td>
+<td>DINOv2 ViT backbone</td>
+</tr>
+<tr>
+<td><code>model/dinov2/layers/attention.py</code></td>
+<td>Attention block with <code>qkv</code> and <code>proj</code> Linear layers — <strong>LoRA targets</strong></td>
+</tr>
+<tr>
+<td><code>model/dpt.py</code> / <code>model/dualdpt.py</code></td>
+<td>DPT prediction head — <strong>fully trainable during fine-tuning</strong></td>
+</tr>
+<tr>
+<td><code>api.py</code> — <code>DepthAnything3</code></td>
+<td>High-level API: <code>from_pretrained()</code>, forward pass, output post-processing</td>
+</tr>
+<tr>
+<td><code>configs/da3metric-large.yaml</code></td>
+<td>Config for DA3 Mono Metric Large — the variant used for training</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../dataset/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Dataset">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Dataset
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../operation-guide/" class="md-footer__link md-footer__link--next" aria-label="Next: Operation Guide">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Operation Guide
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Wong Wei Ming, Shao Ying Zhan, Dana Yak &mdash; HKUST COMP4471
+
+    </div>
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["announce.dismiss","content.code.annotate","content.code.copy","content.code.select","content.footnote.tooltips","content.tabs.link","content.tooltips","navigation.footer","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.path","navigation.sections","navigation.top","navigation.tracking","search.highlight"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      
+    
+  </body>
+</html>

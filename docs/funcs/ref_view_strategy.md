@@ -26,7 +26,7 @@ Select a view that achieves balance across multiple feature metrics. This strate
    - **Similarity score**: Average cosine similarity with other views
    - **Feature norm**: L2 norm of the original features  
    - **Feature variance**: Variance across feature dimensions
-3. Normalizes each metric to [0, 1] range
+3. Normalizes each metric to the range 0 to 1
 4. Selects the view closest to 0.5 (median) across all three metrics
 
 ### 2. 🎢 `saddle_sim_range`

@@ -9,8 +9,7 @@ description = "Depth Anything 3"
 readme = "README.md"
 requires-python = ">=3.9, <=3.13"
 license = { text = "Apache-2.0" }
-authors = [{ name = "Your Name" }]
-dependencies = []  # managed by pixi — see [tool.pixi]
+authors = [{ name = "Wong Wei Ming, Shao Ying Zhan, Dana Yak" }]
 
 [project.optional-dependencies]
 app = ["gradio>=5", "pillow>=9.0"]
@@ -71,6 +70,7 @@ wandb = "*"
 pytorch = { version = ">=2.0", channel = "pytorch" }
 torchvision = { version = "*", channel = "pytorch" }
 pytorch-cuda = { version = "12.4.*", channel = "pytorch" }
+zensical = ">=0.0.40,<0.0.41"
 
 [tool.pixi.pypi-dependencies]
 xformers = "*"

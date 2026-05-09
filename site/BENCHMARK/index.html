@@ -1,0 +1,1958 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LoRA fine-tuning of Depth Anything 3 for underwater AUV depth estimation — dataset, training, evaluation, and HPC workflow.">
+      
+      
+        <meta name="author" content="Wong Wei Ming, Shao Ying Zhan, Dana Yak">
+      
+      
+      
+        <link rel="prev" href="../API/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.40">
+    
+    
+      
+        <title>📏 Visual Geometry Benchmark - Underwater DA3 Docs</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#visual-geometry-benchmark" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="Underwater DA3 Docs" class="md-header__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Underwater DA3 Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              📏 Visual Geometry Benchmark
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="Underwater DA3 Docs" class="md-nav__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    Underwater DA3 Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Quick Start
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Dataset
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Implementation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operation Guide
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 CLI Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 API Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 Benchmark
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 Benchmark
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨ Highlights
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📑 Table of Contents
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚀 Quick Start
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-download-benchmark-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1. Download Benchmark Data
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-run-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        2. Run Evaluation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataset-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📥 Dataset Download
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📥 Dataset Download">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#download-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Download Options
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extract-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Extract Datasets
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Expected Directory Structure
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Evaluation Pipeline
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Evaluation Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Evaluation Modes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Basic Usage
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selective-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Selective Evaluation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-gpu-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🖥️ Multi-GPU Inference
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 Configuration
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Config File
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Output Structure
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📊 Metrics
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pose-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Pose Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-reconstruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🏗️ 3D Reconstruction
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-results-for-da3-giant" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Expected Results for DA3-GIANT
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataset-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🗂️ Dataset Details
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗂️ Dataset Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eth3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ETH3D
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7scenes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        7Scenes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scannet" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ScanNet++
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hiroom" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        HiRoom
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dtu-49-reconstruction-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        DTU-49 (Reconstruction Only)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dtu-64-pose-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        DTU-64 (Pose Only)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💻 Command Reference
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Command Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Examples
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Troubleshooting
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔍 Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-path-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Data Path Issues
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📝 Citation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📄 License
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨ Highlights
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📑 Table of Contents
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚀 Quick Start
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-download-benchmark-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1. Download Benchmark Data
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-run-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        2. Run Evaluation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataset-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📥 Dataset Download
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📥 Dataset Download">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#download-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Download Options
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extract-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Extract Datasets
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Expected Directory Structure
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Evaluation Pipeline
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Evaluation Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Evaluation Modes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Basic Usage
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selective-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Selective Evaluation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-gpu-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🖥️ Multi-GPU Inference
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 Configuration
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Config File
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Output Structure
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📊 Metrics
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pose-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Pose Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-reconstruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🏗️ 3D Reconstruction
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-results-for-da3-giant" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Expected Results for DA3-GIANT
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataset-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🗂️ Dataset Details
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗂️ Dataset Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eth3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ETH3D
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7scenes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        7Scenes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scannet" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ScanNet++
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hiroom" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        HiRoom
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dtu-49-reconstruction-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        DTU-49 (Reconstruction Only)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dtu-64-pose-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        DTU-64 (Pose Only)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💻 Command Reference
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Command Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Examples
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Troubleshooting
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔍 Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-path-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Data Path Issues
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📝 Citation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📄 License
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+<h1 id="visual-geometry-benchmark">📏 Visual Geometry Benchmark<a class="headerlink" href="#visual-geometry-benchmark" title="Permanent link">&para;</a></h1>
+<p>This document provides comprehensive instructions for running benchmark evaluation on Depth Anything 3.</p>
+<h2 id="highlights">✨ Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h2>
+<ul>
+<li>🗂️ <strong>Diverse and Challenging Datasets</strong>: 5 datasets (ETH3D, 7Scenes, ScanNet++, HiRoom, DTU) covering from objects to indoor and outdoor scenes. Part of datasets are recalibrated for high accuracy (see <a href="#scannet">ScanNet++</a> details). All preprocessed datasets are uploaded to <a href="https://huggingface.co/datasets/depth-anything/DA3-BENCH">depth-anything/DA3-BENCH</a>.</li>
+<li>🔧 <strong>Robust Evaluation Pipeline</strong>: Standardized pipeline featuring RANSAC-based pose alignment for better coordinate system alignment, TSDF fusion for directly reflecting depth 3D consistency.</li>
+<li>📊 <strong>Standardized Metrics</strong>: Performance measured using established metrics: AUC for pose accuracy, F1-score and Chamfer Distance for reconstruction.</li>
+</ul>
+<hr />
+<h2 id="table-of-contents">📑 Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#quick-start">🚀 Quick Start</a></li>
+<li><a href="#dataset-download">📥 Dataset Download</a></li>
+<li><a href="#evaluation-pipeline">⚙️ Evaluation Pipeline</a></li>
+<li><a href="#configuration">🔧 Configuration</a></li>
+<li><a href="#metrics">📊 Metrics</a></li>
+<li><a href="#dataset-details">🗂️ Dataset Details</a></li>
+<li><a href="#command-reference">💻 Command Reference</a></li>
+<li><a href="#troubleshooting">🔍 Troubleshooting</a></li>
+</ul>
+<hr />
+<h2 id="quick-start">🚀 Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="1-download-benchmark-data">1. Download Benchmark Data<a class="headerlink" href="#1-download-benchmark-data" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>💡 <strong>Note:</strong> Install HuggingFace CLI first: <code>pip install -U huggingface_hub[cli]</code></p>
+<p>🌐 <strong>Mirror:</strong> If download is slow, try: <code>export HF_ENDPOINT=https://hf-mirror.com</code></p>
+</blockquote>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>da3_release
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Create directory and download from HuggingFace</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>workspace/benchmark_dataset
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>hf<span class="w"> </span>download<span class="w"> </span>depth-anything/DA3-BENCH<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span>--local-dir<span class="w"> </span>workspace/benchmark_dataset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span>--repo-type<span class="w"> </span>dataset
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Extract all datasets</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nb">cd</span><span class="w"> </span>workspace/benchmark_dataset
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>*.zip<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>unzip<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+</span></code></pre></div>
+<h3 id="2-run-evaluation">2. Run Evaluation<a class="headerlink" href="#2-run-evaluation" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Set model (default: depth-anything/DA3-GIANT)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">MODEL</span><span class="o">=</span>depth-anything/DA3-GIANT
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Full evaluation (all datasets, all modes)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># View results</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>eval.print_only<span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<hr />
+<h2 id="dataset-download">📥 Dataset Download<a class="headerlink" href="#dataset-download" title="Permanent link">&para;</a></h2>
+<p>All benchmark datasets are hosted on HuggingFace: <strong><a href="https://huggingface.co/datasets/depth-anything/DA3-BENCH">depth-anything/DA3-BENCH</a></strong></p>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>File</th>
+<th>Size</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ETH3D</td>
+<td><code>eth3d.zip</code></td>
+<td>~14.1 GB</td>
+<td>High-resolution multi-view stereo (indoor/outdoor)</td>
+</tr>
+<tr>
+<td>ScanNet++</td>
+<td><code>scannetpp.zip</code></td>
+<td>~10.1 GB</td>
+<td>High-quality RGB-D indoor scenes</td>
+</tr>
+<tr>
+<td>DTU-49</td>
+<td><code>dtu.zip</code></td>
+<td>~8.3 GB</td>
+<td>Multi-view stereo benchmark (22 scenes × 49 views)</td>
+</tr>
+<tr>
+<td>7Scenes</td>
+<td><code>7scenes.zip</code></td>
+<td>~3.3 GB</td>
+<td>RGB-D indoor localization</td>
+</tr>
+<tr>
+<td>DTU-64</td>
+<td><code>dtu64.zip</code></td>
+<td>~1.7 GB</td>
+<td>DTU subset for pose evaluation (13 scenes × 64 views)</td>
+</tr>
+<tr>
+<td>HiRoom</td>
+<td><code>hiroom.zip</code></td>
+<td>~0.7 GB</td>
+<td>High-resolution indoor rooms</td>
+</tr>
+</tbody>
+</table>
+<h3 id="download-options">Download Options<a class="headerlink" href="#download-options" title="Permanent link">&para;</a></h3>
+<p><strong>Option 1: Download All (Recommended)</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>hf<span class="w"> </span>download<span class="w"> </span>depth-anything/DA3-BENCH<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span>--local-dir<span class="w"> </span>workspace/benchmark_dataset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>--repo-type<span class="w"> </span>dataset
+</span></code></pre></div></p>
+<p><strong>Option 2: Download Specific Dataset</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Download only HiRoom</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>hf<span class="w"> </span>download<span class="w"> </span>depth-anything/DA3-BENCH<span class="w"> </span>hiroom.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span>--local-dir<span class="w"> </span>workspace/benchmark_dataset<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span>--repo-type<span class="w"> </span>dataset
+</span></code></pre></div></p>
+<p><strong>Option 3: Manual Download</strong></p>
+<p>Visit <a href="https://huggingface.co/datasets/depth-anything/DA3-BENCH">https://huggingface.co/datasets/depth-anything/DA3-BENCH</a> and download the zip files manually.</p>
+<h3 id="extract-datasets">Extract Datasets<a class="headerlink" href="#extract-datasets" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>workspace/benchmark_dataset
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Extract all</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>*.zip<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>unzip<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Or extract specific dataset</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>unzip<span class="w"> </span>hiroom.zip
+</span></code></pre></div>
+<h3 id="expected-directory-structure">Expected Directory Structure<a class="headerlink" href="#expected-directory-structure" title="Permanent link">&para;</a></h3>
+<p>After extraction, your directory should look like:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>workspace/benchmark_dataset/
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── eth3d/
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>│   ├── courtyard/
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>│   ├── electro/
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>│   └── ...
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>├── 7scenes/
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>│   └── 7Scenes/
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>│       ├── chess/
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>│       └── ...
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>├── scannetpp/
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>│   ├── 09c1414f1b/
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>│   └── ...
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>├── hiroom/
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>│   ├── data/
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>│   ├── fused_pcd/
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>│   └── selected_scene_list_val.txt
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>├── dtu/
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>│   ├── Rectified/
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>│   ├── Cameras/
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>│   ├── Points/
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>│   ├── SampleSet/
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>│   └── depth_raw/
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>└── dtu64/
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>    ├── Cameras/
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>    ├── scan105/
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>    └── ...
+</span></code></pre></div></p>
+<hr />
+<h2 id="evaluation-pipeline">⚙️ Evaluation Pipeline<a class="headerlink" href="#evaluation-pipeline" title="Permanent link">&para;</a></h2>
+<h3 id="evaluation-modes">Evaluation Modes<a class="headerlink" href="#evaluation-modes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+<th>Metrics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pose</code></td>
+<td>Camera pose estimation</td>
+<td>AUC@3°, AUC@30°</td>
+</tr>
+<tr>
+<td><code>recon_unposed</code></td>
+<td>3D reconstruction with <strong>predicted</strong> poses</td>
+<td>F-score, Overall</td>
+</tr>
+<tr>
+<td><code>recon_posed</code></td>
+<td>3D reconstruction with <strong>GT</strong> poses</td>
+<td>F-score, Overall</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>da3_release
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">MODEL</span><span class="o">=</span>depth-anything/DA3-GIANT
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Full evaluation (inference + evaluation + print results)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Skip inference, only evaluate existing predictions</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>eval.eval_only<span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Only print saved metrics</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>eval.print_only<span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<h3 id="selective-evaluation">Selective Evaluation<a class="headerlink" href="#selective-evaluation" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Evaluate specific datasets</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span>eval.datasets<span class="o">=[</span>hiroom<span class="o">]</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Evaluate specific modes</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span>eval.modes<span class="o">=[</span>pose,recon_unposed<span class="o">]</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Combine dataset and mode selection</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span>eval.datasets<span class="o">=[</span>hiroom<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span>eval.modes<span class="o">=[</span>pose<span class="o">]</span>
+</span></code></pre></div>
+<h3 id="multi-gpu-inference">🖥️ Multi-GPU Inference<a class="headerlink" href="#multi-gpu-inference" title="Permanent link">&para;</a></h3>
+<p>The evaluator automatically distributes inference across available GPUs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Use 4 GPUs</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span>,1,2,3<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Use all available GPUs (default)</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Single GPU</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span>
+</span></code></pre></div>
+<hr />
+<h2 id="configuration">🔧 Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<h3 id="config-file">Config File<a class="headerlink" href="#config-file" title="Permanent link">&para;</a></h3>
+<p>Default config: <code>src/depth_anything_3/bench/configs/eval_bench.yaml</code></p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Model path</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nt">model</span><span class="p">:</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">depth-anything/DA3-GIANT</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># Workspace directory</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nt">workspace</span><span class="p">:</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nt">work_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./workspace/evaluation</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="c1"># Evaluation settings</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="nt">eval</span><span class="p">:</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">eth3d</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">7scenes</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">scannetpp</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">hiroom</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">dtu</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">dtu64</span><span class="p p-Indicator">]</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">  </span><span class="nt">modes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">pose</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">recon_unposed</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">recon_posed</span><span class="p p-Indicator">]</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">  </span><span class="nt">max_frames</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w">      </span><span class="c1"># Max frames per scene (-1 = no limit)</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">  </span><span class="nt">scenes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w">         </span><span class="c1"># Specific scenes (null = all)</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="c1"># Inference settings</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="nt">inference</span><span class="p">:</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">  </span><span class="nt">num_fusion_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span></code></pre></div>
+<h3 id="output-structure">Output Structure<a class="headerlink" href="#output-structure" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>workspace/evaluation/
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>├── model_results/              # Inference outputs
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>│   ├── eth3d/
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>│   │   └── {scene}/
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>│   │       ├── unposed/       # Predictions for recon_unposed
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│   │       └── posed/         # Predictions for recon_posed
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>│   ├── 7scenes/
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>│   ├── scannetpp/
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>│   ├── hiroom/
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>│   ├── dtu/
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>│   └── dtu64/
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>└── metric_results/             # Evaluation metrics (JSON)
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>    ├── eth3d_pose.json
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>    ├── eth3d_recon_unposed.json
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    ├── eth3d_recon_posed.json
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>    └── ...
+</span></code></pre></div>
+<hr />
+<h2 id="metrics">📊 Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
+<h3 id="pose-estimation">🎯 Pose Estimation<a class="headerlink" href="#pose-estimation" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auc3</strong></td>
+<td>Area Under Curve at 3° angular error threshold</td>
+</tr>
+<tr>
+<td><strong>Auc30</strong></td>
+<td>Area Under Curve at 30° angular error threshold</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3d-reconstruction">🏗️ 3D Reconstruction<a class="headerlink" href="#3d-reconstruction" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>F-score</strong></td>
+<td>Harmonic mean of Precision and Recall</td>
+<td>Higher is better</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td>(Accuracy + Completeness) / 2</td>
+<td>Lower is better (error in meters/mm)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> DTU reports Overall in millimeters; other datasets report in meters.</p>
+</blockquote>
+<h3 id="expected-results-for-da3-giant">Expected Results for DA3-GIANT<a class="headerlink" href="#expected-results-for-da3-giant" title="Permanent link">&para;</a></h3>
+<p>If your setup is correct, you should get the following results when evaluating the <strong>DA3-GIANT</strong> model:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>========================================================
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>📊 SUMMARY
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>========================================================
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>🎯 POSE ESTIMATION
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>---------------------------------------------------------------------------------------
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>Metric         Avg         HiRoom      ETH3D       DTU-64      7Scenes     ScanNet++
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>---------------------------------------------------------------------------------------
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>Auc3           0.6705      0.8030      0.4872      0.9408      0.2744      0.8470
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>Auc30          0.9436      0.9592      0.9153      0.9939      0.8668      0.9827
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>🏗️  RECON_UNPOSED (Pred Pose)
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>---------------------------------------------------------------------------------------
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>Metric         Avg*        HiRoom      ETH3D       DTU         7Scenes     ScanNet++
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>---------------------------------------------------------------------------------------
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>F-score        0.7345      0.8629      0.7876      N/A         0.5043      0.7831
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>Overall        0.1682      0.0457      0.4366      1.7927      0.1230      0.0676
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>🏗️  RECON_POSED (GT Pose)
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>---------------------------------------------------------------------------------------
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>Metric         Avg*        HiRoom      ETH3D       DTU         7Scenes     ScanNet++
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>---------------------------------------------------------------------------------------
+</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>F-score        0.7978      0.9546      0.8685      N/A         0.5635      0.8045
+</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>Overall        0.1408      0.0213      0.3679      1.7488      0.1092      0.0649
+</span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>
+</span><span id="__span-11-26"><a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>* Avg F-score / Overall = average over HiRoom, ETH3D, 7Scenes, ScanNet++ (4 datasets)
+</span></code></pre></div>
+<hr />
+<h2 id="dataset-details">🗂️ Dataset Details<a class="headerlink" href="#dataset-details" title="Permanent link">&para;</a></h2>
+<h3 id="eth3d">ETH3D<a class="headerlink" href="#eth3d" title="Permanent link">&para;</a></h3>
+<p>High-resolution multi-view stereo benchmark with laser-scanned ground truth.</p>
+<ul>
+<li><strong>Scenes:</strong> 11 (courtyard, electro, kicker, pipes, relief, delivery_area, facade, office, playground, relief_2, terrains)</li>
+<li><strong>Resolution:</strong> Variable (high-res DSLR images)</li>
+<li><strong>GT:</strong> Laser-scanned meshes + depth maps</li>
+</ul>
+<blockquote>
+<p><strong>⚠️ Image Filtering:</strong> Some images with unusual camera rotations are filtered out for stable evaluation. See <code>ETH3D_FILTER_KEYS</code> in <code>constants.py</code>.</p>
+</blockquote>
+<h3 id="7scenes">7Scenes<a class="headerlink" href="#7scenes" title="Permanent link">&para;</a></h3>
+<p>RGB-D dataset for camera relocalization.</p>
+<ul>
+<li><strong>Scenes:</strong> 7 (chess, fire, heads, office, pumpkin, redkitchen, stairs)</li>
+<li><strong>Resolution:</strong> 640×480</li>
+<li><strong>GT:</strong> Poses from KinectFusion, meshes from TSDF fusion</li>
+</ul>
+<h3 id="scannet">ScanNet++<a class="headerlink" href="#scannet" title="Permanent link">&para;</a></h3>
+<p>High-quality indoor RGB-D dataset with dense annotations.</p>
+<ul>
+<li><strong>Scenes:</strong> 20 validation scenes</li>
+<li><strong>Resolution:</strong> 768×1024 (after undistortion)</li>
+<li><strong>GT:</strong> High-quality meshes from FARO scanner</li>
+</ul>
+<blockquote>
+<p><strong>⚠️ Camera Pose Re-calibration:</strong> The default ScanNet++ poses are often inaccurate due to motion blur and textureless frames from iPhone captures. We re-ran COLMAP with the following improvements:
+- <strong>Frame filtering:</strong> Removed blurry images during frame extraction
+- <strong>Fisheye calibration:</strong> Jointly calibrated fisheye camera for wider FOV and better accuracy
+- <strong>Exhaustive matching:</strong> Used COLMAP's exhaustive matcher and mapper for reliable poses (takes several days per scene but necessary for quality)
+- All processed scenes are available at <a href="https://huggingface.co/datasets/haotongl/scannetpp_zipnerf">haotongl/scannetpp_zipnerf</a></p>
+</blockquote>
+<h3 id="hiroom">HiRoom<a class="headerlink" href="#hiroom" title="Permanent link">&para;</a></h3>
+<p>Indoor room scenes with high-resolution RGB-D data.</p>
+<ul>
+<li><strong>Scenes:</strong> 24 validation scenes</li>
+<li><strong>GT:</strong> Fused point clouds</li>
+</ul>
+<h3 id="dtu-49-reconstruction-only">DTU-49 (Reconstruction Only)<a class="headerlink" href="#dtu-49-reconstruction-only" title="Permanent link">&para;</a></h3>
+<p>Multi-view stereo benchmark following MVSNet evaluation protocol.</p>
+<ul>
+<li><strong>Scenes:</strong> 22 evaluation scenes</li>
+<li><strong>Views:</strong> 49 images per scene</li>
+<li><strong>GT:</strong> Laser-scanned point clouds with observation masks</li>
+<li><strong>Metrics:</strong> Overall only (accuracy + completeness in mm)</li>
+</ul>
+<h3 id="dtu-64-pose-only">DTU-64 (Pose Only)<a class="headerlink" href="#dtu-64-pose-only" title="Permanent link">&para;</a></h3>
+<p>DTU subset for pose estimation evaluation.</p>
+<ul>
+<li><strong>Scenes:</strong> 13 scenes</li>
+<li><strong>Views:</strong> 64 images per scene</li>
+<li><strong>Metrics:</strong> AUC@3°, AUC@30°</li>
+</ul>
+<blockquote>
+<p><strong>Why two DTU settings?</strong>
+- <strong>DTU-64</strong> (pose): More views = more challenging pose estimation
+- <strong>DTU-49</strong> (recon): Standard MVSNet protocol for fair comparison with MVS methods</p>
+</blockquote>
+<hr />
+<h2 id="command-reference">💻 Command Reference<a class="headerlink" href="#command-reference" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>python -m depth_anything_3.bench.evaluator [OPTIONS] [KEY=VALUE ...]
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Configuration:
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>  --config PATH                      Config YAML file (default: bench/configs/eval_bench.yaml)
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>Config Overrides (using dotlist notation):
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>  model.path=VALUE                   Model path or HuggingFace ID
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>  workspace.work_dir=VALUE           Working directory for outputs
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>  eval.datasets=[dataset1,dataset2]  Datasets to evaluate (eth3d,7scenes,scannetpp,hiroom,dtu,dtu64)
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>  eval.modes=[mode1,mode2]           Evaluation modes (pose,recon_unposed,recon_posed)
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>  eval.scenes=[scene1,scene2]        Specific scenes to evaluate (null=all)
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>  eval.max_frames=VALUE              Max frames per scene (-1=no limit, default: 100)
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>  eval.ref_view_strategy=VALUE       Reference view strategy (default: first)
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>  eval.eval_only=VALUE               Only run evaluation (skip inference) (true/false)
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>  eval.print_only=VALUE              Only print saved metrics (true/false)
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>  inference.num_fusion_workers=VALUE Number of parallel workers (default: 4)
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>  inference.debug=VALUE              Enable debug mode (true/false)
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>Special Flags:
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>  --help, -h                         Show this help message
+</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>
+</span><span id="__span-12-22"><a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a>Multi-GPU:
+</span><span id="__span-12-23"><a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a>  Use CUDA_VISIBLE_DEVICES to specify GPUs (auto-detected and distributed)
+</span></code></pre></div>
+<h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">MODEL</span><span class="o">=</span>depth-anything/DA3-GIANT
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># Full evaluation</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>model.path<span class="o">=</span><span class="nv">$MODEL</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># Quick test on HiRoom only</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span>eval.datasets<span class="o">=[</span>hiroom<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">    </span>eval.modes<span class="o">=[</span>pose<span class="o">]</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="c1"># Pose-only evaluation (all 5 pose datasets)</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">    </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">    </span>eval.datasets<span class="o">=[</span>eth3d,7scenes,scannetpp,hiroom,dtu64<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">    </span>eval.modes<span class="o">=[</span>pose<span class="o">]</span>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="c1"># Recon-only evaluation (all 5 recon datasets)</span>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">    </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-21"><a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="w">    </span>eval.datasets<span class="o">=[</span>eth3d,7scenes,scannetpp,hiroom,dtu<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-22"><a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="w">    </span>eval.modes<span class="o">=[</span>recon_unposed,recon_posed<span class="o">]</span>
+</span><span id="__span-13-23"><a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a>
+</span><span id="__span-13-24"><a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a><span class="c1"># Debug specific scenes</span>
+</span><span id="__span-13-25"><a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-26"><a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a><span class="w">    </span>model.path<span class="o">=</span><span class="nv">$MODEL</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-27"><a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a><span class="w">    </span>eval.datasets<span class="o">=[</span>eth3d<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-28"><a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a><span class="w">    </span>eval.scenes<span class="o">=[</span>courtyard<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-13-29"><a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a><span class="w">    </span>inference.debug<span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-13-30"><a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a>
+</span><span id="__span-13-31"><a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a><span class="c1"># Re-evaluate without re-running inference</span>
+</span><span id="__span-13-32"><a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>eval.eval_only<span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-13-33"><a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a>
+</span><span id="__span-13-34"><a id="__codelineno-13-34" name="__codelineno-13-34" href="#__codelineno-13-34"></a><span class="c1"># Just view results</span>
+</span><span id="__span-13-35"><a id="__codelineno-13-35" name="__codelineno-13-35" href="#__codelineno-13-35"></a>python<span class="w"> </span>-m<span class="w"> </span>depth_anything_3.bench.evaluator<span class="w"> </span>eval.print_only<span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<hr />
+<h2 id="troubleshooting">🔍 Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="data-path-issues">Data Path Issues<a class="headerlink" href="#data-path-issues" title="Permanent link">&para;</a></h3>
+<p>Ensure dataset paths in <code>src/depth_anything_3/utils/constants.py</code> are correct:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Default paths (relative to project root)</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">ETH3D_EVAL_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;workspace/benchmark_dataset/eth3d&quot;</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">SEVENSCENES_EVAL_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;workspace/benchmark_dataset/7scenes&quot;</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">SCANNETPP_EVAL_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;workspace/benchmark_dataset/scannetpp&quot;</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">HIROOM_EVAL_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;workspace/benchmark_dataset/hiroom/data&quot;</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="n">DTU_EVAL_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;workspace/benchmark_dataset/dtu&quot;</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">DTU64_EVAL_DATA_ROOT</span> <span class="o">=</span> <span class="s2">&quot;workspace/benchmark_dataset/dtu64&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="citation">📝 Citation<a class="headerlink" href="#citation" title="Permanent link">&para;</a></h2>
+<p>If you find this benchmark useful, please cite:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>@article{depthanything3,
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  title={Depth Anything 3: Recovering the visual space from any views},
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  author={Haotong Lin and Sili Chen and Jun Hao Liew and Donny Y. Chen and Zhenyu Li and Guang Shi and Jiashi Feng and Bingyi Kang},
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>  journal={arXiv preprint arXiv:2511.10647},
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>  year={2025}
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>}
+</span></code></pre></div>
+<p>Please also cite the original dataset papers for each benchmark you use.</p>
+<hr />
+<h2 id="license">📄 License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
+<p>The benchmark datasets are provided for research purposes only. Users must follow the original licenses of each dataset:</p>
+<ul>
+<li><strong>ETH3D:</strong> <a href="https://www.eth3d.net/">https://www.eth3d.net/</a></li>
+<li><strong>7Scenes:</strong> <a href="https://www.microsoft.com/en-us/research/project/rgb-d-dataset-7-scenes/">Microsoft Research</a></li>
+<li><strong>ScanNet++:</strong> <a href="http://www.scan-net.org/">http://www.scan-net.org/</a></li>
+<li><strong>DTU:</strong> <a href="https://roboimagedata.compute.dtu.dk/">https://roboimagedata.compute.dtu.dk/</a></li>
+<li><strong>HiRoom:</strong> <a href="https://jerrypiglet.github.io/SVLightVerse/">SVLightVerse</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../API/" class="md-footer__link md-footer__link--prev" aria-label="Previous: DA3 API Reference">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                DA3 API Reference
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Wong Wei Ming, Shao Ying Zhan, Dana Yak &mdash; HKUST COMP4471
+
+    </div>
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["announce.dismiss","content.code.annotate","content.code.copy","content.code.select","content.footnote.tooltips","content.tabs.link","content.tooltips","navigation.footer","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.path","navigation.sections","navigation.top","navigation.tracking","search.highlight"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      
+    
+  </body>
+</html>

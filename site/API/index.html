@@ -1,0 +1,2558 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LoRA fine-tuning of Depth Anything 3 for underwater AUV depth estimation — dataset, training, evaluation, and HPC workflow.">
+      
+      
+        <meta name="author" content="Wong Wei Ming, Shao Ying Zhan, Dana Yak">
+      
+      
+      
+        <link rel="prev" href="../CLI/">
+      
+      
+        <link rel="next" href="../BENCHMARK/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.40">
+    
+    
+      
+        <title>📚 DepthAnything3 API Documentation - Underwater DA3 Docs</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#depthanything3-api-documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="Underwater DA3 Docs" class="md-header__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Underwater DA3 Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              📚 DepthAnything3 API Documentation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="none" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="Underwater DA3 Docs" class="md-nav__button md-logo" aria-label="Underwater DA3 Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    Underwater DA3 Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Quick Start
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Dataset
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Implementation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Operation Guide
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 CLI Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 API Reference
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 API Reference
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📑 Table of Contents
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📖 Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💡 Usage Examples
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-depth-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚀 Basic Depth Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pose-conditioned-depth-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📷 Pose-Conditioned Depth Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📤 Export Results
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Feature Extraction
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-export-with-gaussian-splatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨ Advanced Export with Gaussian Splatting
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-export-with-feature-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 Advanced Export with Feature Visualization
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-ray-based-pose-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📐 Using Ray-Based Pose Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-view-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Reference View Selection
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 Core API
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Core API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#depthanything3-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔨 DepthAnything3 Class
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔨 DepthAnything3 Class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Initialization
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inference-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚀 inference() Method
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📸 Input Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📸 Input Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>image</code> (required)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extrinsics-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>extrinsics</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intrinsics-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>intrinsics</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pose-alignment-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Pose Alignment Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Pose Alignment Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#align_to_input_ext_scale-default-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>align_to_input_ext_scale</code> (default: True)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infer_gs-default-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>infer_gs</code> (default: False)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_ray_pose-default-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>use_ray_pose</code> (default: False)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ref_view_strategy-default-saddle_balanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>ref_view_strategy</code> (default: "saddle_balanced")
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Feature Export Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔍 Feature Export Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export_feat_layers-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_feat_layers</code> (default: [])
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendering-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎥 Rendering Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎥 Rendering Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#render_exts-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>render_exts</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render_ixts-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>render_ixts</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render_hw-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>render_hw</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Processing Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚡ Processing Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#process_res-default-504" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>process_res</code> (default: 504)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process_res_method-default-upper_bound_resize" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>process_res_method</code> (default: "upper_bound_resize")
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📦 Export Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📦 Export Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export_dir-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_dir</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export_format-default-mini_npz" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_format</code> (default: "mini_npz")
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glb-export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🌐 GLB Export Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌐 GLB Export Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conf_thresh_percentile-default-400" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>conf_thresh_percentile</code> (default: 40.0)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#num_max_points-default-1000000" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>num_max_points</code> (default: 1,000,000)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_cameras-default-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>show_cameras</code> (default: True)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-visualization-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 Feature Visualization Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎨 Feature Visualization Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feat_vis_fps-default-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>feat_vis_fps</code> (default: 15)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3dgs-and-3dgs-video-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨🎥 3DGS and 3DGS Video Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✨🎥 3DGS and 3DGS Video Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export_kwargs-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_kwargs</code> (default: <code>{}</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📤 Export Formats
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📤 Export Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mini_npz" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📊 <code>mini_npz</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#npz" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📦 <code>npz</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glb" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🌐 <code>glb</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gs_ply" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨ <code>gs_ply</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gs_video" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎥 <code>gs_video</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feat_vis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 <code>feat_vis</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#depth_vis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 <code>depth_vis</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-format-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔗 Multiple Format Export
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#return-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ↩️ Return Value
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="↩️ Return Value">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📊 Core Outputs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#camera-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📷 Camera Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎁 Additional Outputs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💻 Usage Example
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BENCHMARK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  DA3 Benchmark
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📑 Table of Contents
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📖 Overview
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💡 Usage Examples
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-depth-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚀 Basic Depth Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pose-conditioned-depth-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📷 Pose-Conditioned Depth Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📤 Export Results
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Feature Extraction
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-export-with-gaussian-splatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨ Advanced Export with Gaussian Splatting
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-export-with-feature-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 Advanced Export with Feature Visualization
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-ray-based-pose-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📐 Using Ray-Based Pose Estimation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reference-view-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Reference View Selection
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔧 Core API
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Core API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#depthanything3-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔨 DepthAnything3 Class
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔨 DepthAnything3 Class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Initialization
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inference-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚀 inference() Method
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📸 Input Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📸 Input Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>image</code> (required)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extrinsics-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>extrinsics</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intrinsics-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>intrinsics</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pose-alignment-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎯 Pose Alignment Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Pose Alignment Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#align_to_input_ext_scale-default-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>align_to_input_ext_scale</code> (default: True)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infer_gs-default-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>infer_gs</code> (default: False)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use_ray_pose-default-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>use_ray_pose</code> (default: False)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ref_view_strategy-default-saddle_balanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>ref_view_strategy</code> (default: "saddle_balanced")
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 Feature Export Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔍 Feature Export Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export_feat_layers-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_feat_layers</code> (default: [])
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendering-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎥 Rendering Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎥 Rendering Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#render_exts-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>render_exts</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render_ixts-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>render_ixts</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render_hw-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>render_hw</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Processing Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚡ Processing Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#process_res-default-504" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>process_res</code> (default: 504)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process_res_method-default-upper_bound_resize" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>process_res_method</code> (default: "upper_bound_resize")
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📦 Export Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📦 Export Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export_dir-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_dir</code> (optional)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export_format-default-mini_npz" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_format</code> (default: "mini_npz")
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glb-export-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🌐 GLB Export Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌐 GLB Export Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conf_thresh_percentile-default-400" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>conf_thresh_percentile</code> (default: 40.0)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#num_max_points-default-1000000" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>num_max_points</code> (default: 1,000,000)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show_cameras-default-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>show_cameras</code> (default: True)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-visualization-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 Feature Visualization Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎨 Feature Visualization Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feat_vis_fps-default-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>feat_vis_fps</code> (default: 15)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3dgs-and-3dgs-video-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨🎥 3DGS and 3DGS Video Parameters
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✨🎥 3DGS and 3DGS Video Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export_kwargs-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>export_kwargs</code> (default: <code>{}</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📤 Export Formats
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📤 Export Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mini_npz" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📊 <code>mini_npz</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#npz" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📦 <code>npz</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glb" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🌐 <code>glb</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gs_ply" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ✨ <code>gs_ply</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gs_video" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎥 <code>gs_video</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feat_vis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔍 <code>feat_vis</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#depth_vis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎨 <code>depth_vis</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-format-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🔗 Multiple Format Export
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#return-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ↩️ Return Value
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="↩️ Return Value">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📊 Core Outputs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#camera-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📷 Camera Parameters
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🎁 Additional Outputs
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        💻 Usage Example
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+<h1 id="depthanything3-api-documentation">📚 DepthAnything3 API Documentation<a class="headerlink" href="#depthanything3-api-documentation" title="Permanent link">&para;</a></h1>
+<h2 id="table-of-contents">📑 Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#overview">📖 Overview</a></li>
+<li><a href="#usage-examples">💡 Usage Examples</a></li>
+<li><a href="#core-api">🔧 Core API</a></li>
+<li><a href="#depthanything3-class">DepthAnything3 Class</a></li>
+<li><a href="#inference-method">inference() Method</a></li>
+<li><a href="#parameters">⚙️ Parameters</a></li>
+<li><a href="#input-parameters">Input Parameters</a></li>
+<li><a href="#pose-alignment-parameters">Pose Alignment Parameters</a></li>
+<li><a href="#feature-export-parameters">Feature Export Parameters</a></li>
+<li><a href="#rendering-parameters">Rendering Parameters</a></li>
+<li><a href="#processing-parameters">Processing Parameters</a></li>
+<li><a href="#export-parameters">Export Parameters</a></li>
+<li><a href="#export-formats">📤 Export Formats</a></li>
+<li><a href="#return-value">↩️ Return Value</a></li>
+</ol>
+<h2 id="overview">📖 Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This documentation provides comprehensive API reference for DepthAnything3, including usage examples, parameter specifications, export formats, and advanced features. It covers both basic pose and depth estimation workflows and advanced pose-conditioned processing with multiple export capabilities.</p>
+<h2 id="usage-examples">💡 Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<p>Here are quick examples to get you started:</p>
+<h3 id="basic-depth-estimation">🚀 Basic Depth Estimation<a class="headerlink" href="#basic-depth-estimation" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">depth_anything_3.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">DepthAnything3</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Initialize and run inference</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">model</span> <span class="o">=</span> <span class="n">DepthAnything3</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;depth-anything/DA3NESTED-GIANT-LARGE&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">([</span><span class="s2">&quot;image1.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;image2.jpg&quot;</span><span class="p">])</span>
+</span></code></pre></div>
+<h3 id="pose-conditioned-depth-estimation">📷 Pose-Conditioned Depth Estimation<a class="headerlink" href="#pose-conditioned-depth-estimation" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># With camera parameters for better consistency</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">image</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image1.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;image2.jpg&quot;</span><span class="p">],</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">extrinsics</span><span class="o">=</span><span class="n">extrinsics_array</span><span class="p">,</span>  <span class="c1"># (N, 4, 4)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">intrinsics</span><span class="o">=</span><span class="n">intrinsics_array</span>   <span class="c1"># (N, 3, 3)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="export-results">📤 Export Results<a class="headerlink" href="#export-results" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Export depth data and 3D visualization</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">export_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">export_format</span><span class="o">=</span><span class="s2">&quot;mini_npz-glb&quot;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="feature-extraction">🔍 Feature Extraction<a class="headerlink" href="#feature-extraction" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Export intermediate features from specific layers</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">export_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">export_format</span><span class="o">=</span><span class="s2">&quot;feat_vis&quot;</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">export_feat_layers</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># Export features from layers 0, 1, 2</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="advanced-export-with-gaussian-splatting">✨ Advanced Export with Gaussian Splatting<a class="headerlink" href="#advanced-export-with-gaussian-splatting" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Export multiple formats including Gaussian Splatting</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># Note: infer_gs=True requires da3-giant or da3nested-giant-large model</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">model</span> <span class="o">=</span> <span class="n">DepthAnything3</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;da3-giant&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">extrinsics</span><span class="o">=</span><span class="n">extrinsics_array</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">intrinsics</span><span class="o">=</span><span class="n">intrinsics_array</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">export_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">export_format</span><span class="o">=</span><span class="s2">&quot;npz-glb-gs_ply-gs_video&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">align_to_input_ext_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">infer_gs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Required for gs_ply and gs_video exports</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="advanced-export-with-feature-visualization">🎨 Advanced Export with Feature Visualization<a class="headerlink" href="#advanced-export-with-feature-visualization" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Export with intermediate feature visualization</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">export_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">export_format</span><span class="o">=</span><span class="s2">&quot;mini_npz-glb-depth_vis-feat_vis&quot;</span><span class="p">,</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">export_feat_layers</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">feat_vis_fps</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="using-ray-based-pose-estimation">📐 Using Ray-Based Pose Estimation<a class="headerlink" href="#using-ray-based-pose-estimation" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Use ray-based pose estimation instead of camera decoder</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">export_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">export_format</span><span class="o">=</span><span class="s2">&quot;glb&quot;</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">use_ray_pose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Enable ray-based pose estimation</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="reference-view-selection">🎯 Reference View Selection<a class="headerlink" href="#reference-view-selection" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># For multi-view inputs, automatically select the best reference view</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">ref_view_strategy</span><span class="o">=</span><span class="s2">&quot;saddle_balanced&quot;</span><span class="p">,</span>  <span class="c1"># Default: balanced selection</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">)</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># For video sequences, use middle frame as reference</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">image</span><span class="o">=</span><span class="n">video_frames</span><span class="p">,</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">ref_view_strategy</span><span class="o">=</span><span class="s2">&quot;middle&quot;</span><span class="p">,</span>  <span class="c1"># Good for temporally ordered inputs</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="core-api">🔧 Core API<a class="headerlink" href="#core-api" title="Permanent link">&para;</a></h2>
+<h3 id="depthanything3-class">🔨 DepthAnything3 Class<a class="headerlink" href="#depthanything3-class" title="Permanent link">&para;</a></h3>
+<p>The main API class that provides depth estimation capabilities with optional pose conditioning.</p>
+<h4 id="initialization">🎯 Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h4>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">depth_anything_3</span><span class="w"> </span><span class="kn">import</span> <span class="n">DepthAnything3</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># Initialize the model with a model name</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">model</span> <span class="o">=</span> <span class="n">DepthAnything3</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;da3-large&quot;</span><span class="p">)</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>  <span class="c1"># Move to GPU</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong>
+- <code>model_name</code> (str, default: "da3-large"): The name of the model preset to use.
+  - <strong>Available models:</strong>
+    - 🦾 <code>"da3-giant"</code> - 1.15B params, any-view model with GS support
+    - ⭐ <code>"da3-large"</code> - 0.35B params, any-view model (recommended for most use cases)
+    - 📦 <code>"da3-base"</code> - 0.12B params, any-view model
+    - 🪶 <code>"da3-small"</code> - 0.08B params, any-view model
+    - 👁️ <code>"da3mono-large"</code> - 0.35B params, monocular depth only
+    - 📏 <code>"da3metric-large"</code> - 0.35B params, metric depth with sky segmentation
+    - 🎯 <code>"da3nested-giant-large"</code> - 1.40B params, nested model with all features</p>
+<h3 id="inference-method">🚀 inference() Method<a class="headerlink" href="#inference-method" title="Permanent link">&para;</a></h3>
+<p>The primary inference method that processes images and returns depth predictions.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">image</span><span class="o">=</span><span class="n">image_list</span><span class="p">,</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">extrinsics</span><span class="o">=</span><span class="n">extrinsics_array</span><span class="p">,</span>      <span class="c1"># Optional</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">intrinsics</span><span class="o">=</span><span class="n">intrinsics_array</span><span class="p">,</span>      <span class="c1"># Optional</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">align_to_input_ext_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>   <span class="c1"># Whether to align predicted poses to input scale</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">infer_gs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>                   <span class="c1"># Enable Gaussian branch for gs exports</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">use_ray_pose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>              <span class="c1"># Use ray-based pose estimation instead of camera decoder</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">ref_view_strategy</span><span class="o">=</span><span class="s2">&quot;saddle_balanced&quot;</span><span class="p">,</span>  <span class="c1"># Reference view selection strategy</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="n">render_exts</span><span class="o">=</span><span class="n">render_extrinsics</span><span class="p">,</span>    <span class="c1"># Optional renders for gs_video</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>    <span class="n">render_ixts</span><span class="o">=</span><span class="n">render_intrinsics</span><span class="p">,</span>    <span class="c1"># Optional renders for gs_video</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="n">render_hw</span><span class="o">=</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span>        <span class="c1"># Optional renders for gs_video</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    <span class="n">process_res</span><span class="o">=</span><span class="mi">504</span><span class="p">,</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="n">process_res_method</span><span class="o">=</span><span class="s2">&quot;upper_bound_resize&quot;</span><span class="p">,</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>    <span class="n">export_dir</span><span class="o">=</span><span class="s2">&quot;output_directory&quot;</span><span class="p">,</span>    <span class="c1"># Optional</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="n">export_format</span><span class="o">=</span><span class="s2">&quot;mini_npz&quot;</span><span class="p">,</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>    <span class="n">export_feat_layers</span><span class="o">=</span><span class="p">[],</span>            <span class="c1"># List of layer indices to export features from</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    <span class="n">conf_thresh_percentile</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>      <span class="c1"># Confidence threshold percentile for depth map in GLB export</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="n">num_max_points</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">,</span>         <span class="c1"># Maximum number of points to export in GLB export</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>    <span class="n">show_cameras</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>                <span class="c1"># Whether to show cameras in GLB export</span>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>    <span class="n">feat_vis_fps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>                  <span class="c1"># Frames per second for feature visualization in feat_vis export</span>
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>    <span class="n">export_kwargs</span><span class="o">=</span><span class="p">{}</span>                  <span class="c1"># Optional, additional arguments to export functions. export_format:key:val, see &#39;Parameters/Export Parameters&#39; for details</span>
+</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="parameters">⚙️ Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<h3 id="input-parameters">📸 Input Parameters<a class="headerlink" href="#input-parameters" title="Permanent link">&para;</a></h3>
+<h4 id="image-required"><code>image</code> (required)<a class="headerlink" href="#image-required" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>List[Union[np.ndarray, Image.Image, str]]</code></li>
+<li><strong>Description</strong>: List of input images. Can be numpy arrays, PIL Images, or file paths.</li>
+<li><strong>Example</strong>:
+  <div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># From file paths</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;image1.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;image2.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;image3.jpg&quot;</span><span class="p">]</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># From numpy arrays</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img2</span><span class="p">)]</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># From PIL Images</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image1.jpg&quot;</span><span class="p">),</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image2.jpg&quot;</span><span class="p">)]</span>
+</span></code></pre></div></li>
+</ul>
+<h4 id="extrinsics-optional"><code>extrinsics</code> (optional)<a class="headerlink" href="#extrinsics-optional" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>Optional[np.ndarray]</code></li>
+<li><strong>Shape</strong>: <code>(N, 4, 4)</code> where N is the number of input images</li>
+<li><strong>Description</strong>: Camera extrinsic matrices (world-to-camera transformation). When provided, enables pose-conditioned depth estimation mode.</li>
+<li><strong>Note</strong>: If not provided, the model operates in standard depth estimation mode.</li>
+</ul>
+<h4 id="intrinsics-optional"><code>intrinsics</code> (optional)<a class="headerlink" href="#intrinsics-optional" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>Optional[np.ndarray]</code></li>
+<li><strong>Shape</strong>: <code>(N, 3, 3)</code> where N is the number of input images</li>
+<li><strong>Description</strong>: Camera intrinsic matrices containing focal length and principal point information. When provided, enables pose-conditioned depth estimation mode.</li>
+</ul>
+<h3 id="pose-alignment-parameters">🎯 Pose Alignment Parameters<a class="headerlink" href="#pose-alignment-parameters" title="Permanent link">&para;</a></h3>
+<h4 id="align_to_input_ext_scale-default-true"><code>align_to_input_ext_scale</code> (default: True)<a class="headerlink" href="#align_to_input_ext_scale-default-true" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>bool</code></li>
+<li><strong>Description</strong>: When True the predicted extrinsics are replaced with the input
+  ones and the depth maps are rescaled to match their metric scale. When False the
+  function returns the internally aligned poses computed via Umeyama alignment.</li>
+</ul>
+<h4 id="infer_gs-default-false"><code>infer_gs</code> (default: False)<a class="headerlink" href="#infer_gs-default-false" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>bool</code></li>
+<li><strong>Description</strong>: Enable Gaussian Splatting branch for gaussian splatting exports. Required when using <code>gs_ply</code> or <code>gs_video</code> export formats.</li>
+</ul>
+<h4 id="use_ray_pose-default-false"><code>use_ray_pose</code> (default: False)<a class="headerlink" href="#use_ray_pose-default-false" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>bool</code></li>
+<li><strong>Description</strong>: Use ray-based pose estimation instead of camera decoder for pose prediction. When True, the model uses ray prediction heads to estimate camera poses; when False, it uses the camera decoder approach.</li>
+</ul>
+<h4 id="ref_view_strategy-default-saddle_balanced"><code>ref_view_strategy</code> (default: "saddle_balanced")<a class="headerlink" href="#ref_view_strategy-default-saddle_balanced" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>str</code></li>
+<li><strong>Description</strong>: Strategy for selecting the reference view from multiple input views. Options: <code>"first"</code>, <code>"middle"</code>, <code>"saddle_balanced"</code>, <code>"saddle_sim_range"</code>. Only applied when number of views ≥ 3. See <a href="../funcs/ref_view_strategy/">detailed documentation</a> for strategy comparisons.</li>
+<li><strong>Available strategies</strong>:</li>
+<li><code>"saddle_balanced"</code>: Selects view with balanced features across multiple metrics (recommended default)</li>
+<li><code>"saddle_sim_range"</code>: Selects view with largest similarity range</li>
+<li><code>"first"</code>: Always uses first view (not recommended, equivalent to no reordering for views &lt; 3)</li>
+<li><code>"middle"</code>: Uses middle view (recommended for video sequences)</li>
+</ul>
+<h3 id="feature-export-parameters">🔍 Feature Export Parameters<a class="headerlink" href="#feature-export-parameters" title="Permanent link">&para;</a></h3>
+<h4 id="export_feat_layers-default"><code>export_feat_layers</code> (default: [])<a class="headerlink" href="#export_feat_layers-default" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>List[int]</code></li>
+<li><strong>Description</strong>: List of layer indices to export intermediate features from. Features are stored in the <code>aux</code> dictionary of the Prediction object with keys like <code>feat_layer_0</code>, <code>feat_layer_1</code>, etc.</li>
+</ul>
+<h3 id="rendering-parameters">🎥 Rendering Parameters<a class="headerlink" href="#rendering-parameters" title="Permanent link">&para;</a></h3>
+<p>These arguments are only used when exporting Gaussian-splatting videos (include
+<code>"gs_video"</code> in <code>export_format</code>). They describe an auxiliary camera trajectory
+with <code>M</code> views.</p>
+<h4 id="render_exts-optional"><code>render_exts</code> (optional)<a class="headerlink" href="#render_exts-optional" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>Optional[np.ndarray]</code></li>
+<li><strong>Shape</strong>: <code>(M, 4, 4)</code></li>
+<li><strong>Description</strong>: Camera extrinsics for the synthesized trajectory. If omitted,
+  the exporter falls back to the predicted poses.</li>
+</ul>
+<h4 id="render_ixts-optional"><code>render_ixts</code> (optional)<a class="headerlink" href="#render_ixts-optional" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>Optional[np.ndarray]</code></li>
+<li><strong>Shape</strong>: <code>(M, 3, 3)</code></li>
+<li><strong>Description</strong>: Camera intrinsics for each rendered frame. Leave <code>None</code> to
+  reuse the input intrinsics.</li>
+</ul>
+<h4 id="render_hw-optional"><code>render_hw</code> (optional)<a class="headerlink" href="#render_hw-optional" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>Optional[Tuple[int, int]]</code></li>
+<li><strong>Description</strong>: Explicit output resolution <code>(height, width)</code> for the rendered
+  frames. Defaults to the input resolution when not provided.</li>
+</ul>
+<h3 id="processing-parameters">⚡ Processing Parameters<a class="headerlink" href="#processing-parameters" title="Permanent link">&para;</a></h3>
+<h4 id="process_res-default-504"><code>process_res</code> (default: 504)<a class="headerlink" href="#process_res-default-504" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>int</code></li>
+<li><strong>Description</strong>: Base resolution for processing. The model will resize images to this resolution for inference.</li>
+</ul>
+<h4 id="process_res_method-default-upper_bound_resize"><code>process_res_method</code> (default: "upper_bound_resize")<a class="headerlink" href="#process_res_method-default-upper_bound_resize" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>str</code></li>
+<li><strong>Description</strong>: Method for resizing images to the target resolution.</li>
+<li><strong>Options</strong>:</li>
+<li><code>"upper_bound_resize"</code>: Resize so that the specified dimension (504) becomes the longer side</li>
+<li><code>"lower_bound_resize"</code>: Resize so that the specified dimension (504) becomes the shorter side</li>
+<li><strong>Example</strong>:</li>
+<li>Input: 1200×1600 → Output: 378×504 (with <code>process_res=504</code>, <code>process_res_method="upper_bound_resize"</code>)</li>
+<li>Input: 504×672 → Output: 504×672 (no change needed)</li>
+</ul>
+<h3 id="export-parameters">📦 Export Parameters<a class="headerlink" href="#export-parameters" title="Permanent link">&para;</a></h3>
+<h4 id="export_dir-optional"><code>export_dir</code> (optional)<a class="headerlink" href="#export_dir-optional" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>Optional[str]</code></li>
+<li><strong>Description</strong>: Directory path where exported files will be saved. If not provided, no files will be exported.</li>
+</ul>
+<h4 id="export_format-default-mini_npz"><code>export_format</code> (default: "mini_npz")<a class="headerlink" href="#export_format-default-mini_npz" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Type</strong>: <code>str</code></li>
+<li><strong>Description</strong>: Format for exporting results. Supports multiple formats separated by <code>-</code>.</li>
+<li><strong>Example</strong>: <code>"mini_npz-glb"</code> exports both mini_npz and glb formats.</li>
+</ul>
+<h4 id="glb-export-parameters">🌐 GLB Export Parameters<a class="headerlink" href="#glb-export-parameters" title="Permanent link">&para;</a></h4>
+<p>These parameters are passed directly to the <code>inference()</code> method and only apply when <code>export_format</code> includes <code>"glb"</code>.</p>
+<h5 id="conf_thresh_percentile-default-400"><code>conf_thresh_percentile</code> (default: 40.0)<a class="headerlink" href="#conf_thresh_percentile-default-400" title="Permanent link">&para;</a></h5>
+<ul>
+<li><strong>Type</strong>: <code>float</code></li>
+<li><strong>Description</strong>: Lower percentile for adaptive confidence threshold. Points below this confidence percentile will be filtered out from the point cloud.</li>
+</ul>
+<h5 id="num_max_points-default-1000000"><code>num_max_points</code> (default: 1,000,000)<a class="headerlink" href="#num_max_points-default-1000000" title="Permanent link">&para;</a></h5>
+<ul>
+<li><strong>Type</strong>: <code>int</code></li>
+<li><strong>Description</strong>: Maximum number of points in the exported point cloud. If the point cloud exceeds this limit, it will be downsampled.</li>
+</ul>
+<h5 id="show_cameras-default-true"><code>show_cameras</code> (default: True)<a class="headerlink" href="#show_cameras-default-true" title="Permanent link">&para;</a></h5>
+<ul>
+<li><strong>Type</strong>: <code>bool</code></li>
+<li><strong>Description</strong>: Whether to include camera wireframes in the exported GLB file for visualization.</li>
+</ul>
+<h4 id="feature-visualization-parameters">🎨 Feature Visualization Parameters<a class="headerlink" href="#feature-visualization-parameters" title="Permanent link">&para;</a></h4>
+<p>These parameters are passed directly to the <code>inference()</code> method and only apply when <code>export_format</code> includes <code>"feat_vis"</code>.</p>
+<h5 id="feat_vis_fps-default-15"><code>feat_vis_fps</code> (default: 15)<a class="headerlink" href="#feat_vis_fps-default-15" title="Permanent link">&para;</a></h5>
+<ul>
+<li><strong>Type</strong>: <code>int</code></li>
+<li><strong>Description</strong>: Frame rate for the output video when visualizing features across multiple images.</li>
+</ul>
+<h4 id="3dgs-and-3dgs-video-parameters">✨🎥 3DGS and 3DGS Video Parameters<a class="headerlink" href="#3dgs-and-3dgs-video-parameters" title="Permanent link">&para;</a></h4>
+<p>These parameters are passed directly to the <code>inference()</code> method and only apply when <code>export_format</code> includes <code>"gs_ply"</code> or <code>"gs_video"</code>.</p>
+<h5 id="export_kwargs-default"><code>export_kwargs</code> (default: <code>{}</code>)<a class="headerlink" href="#export_kwargs-default" title="Permanent link">&para;</a></h5>
+<ul>
+<li>Type: <code>dict[str, dict[str, Any]]</code></li>
+<li>Description: Per-format extra arguments passed to export functions, mainly for <code>"gs_ply"</code> and <code>"gs_video"</code>.</li>
+<li>Access pattern: <code>export_kwargs[export_format][key] = value</code></li>
+<li>Example:
+    <div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="s2">&quot;gs_ply&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        <span class="s2">&quot;gs_views_interval&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="p">},</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="s2">&quot;gs_video&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        <span class="s2">&quot;trj_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;interpolate_smooth&quot;</span><span class="p">,</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>        <span class="s2">&quot;chunk_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="s2">&quot;vis_depth&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="p">},</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="p">}</span>
+</span></code></pre></div></li>
+</ul>
+<h2 id="export-formats">📤 Export Formats<a class="headerlink" href="#export-formats" title="Permanent link">&para;</a></h2>
+<p>The API supports multiple export formats for different use cases:</p>
+<h3 id="mini_npz">📊 <code>mini_npz</code><a class="headerlink" href="#mini_npz" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: Minimal NPZ format containing essential data</li>
+<li><strong>Contents</strong>: <code>depth</code>, <code>conf</code>, <code>exts</code>, <code>ixts</code></li>
+<li><strong>Use case</strong>: Lightweight storage for depth data with camera parameters</li>
+</ul>
+<h3 id="npz">📦 <code>npz</code><a class="headerlink" href="#npz" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: Full NPZ format with comprehensive data</li>
+<li><strong>Contents</strong>: <code>depth</code>, <code>conf</code>, <code>exts</code>, <code>ixts</code>, <code>image</code>, etc.</li>
+<li><strong>Use case</strong>: Complete data export for advanced processing</li>
+</ul>
+<h3 id="glb">🌐 <code>glb</code><a class="headerlink" href="#glb" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: 3D visualization format with point cloud and camera poses</li>
+<li><strong>Contents</strong>:</li>
+<li>Point cloud with colors from original images</li>
+<li>Camera wireframes for visualization</li>
+<li>Confidence-based filtering and downsampling</li>
+<li><strong>Use case</strong>: 3D visualization, inspection, and analysis</li>
+<li><strong>Features</strong>:</li>
+<li>Automatic sky depth handling</li>
+<li>Confidence threshold filtering</li>
+<li>Background filtering (black/white)</li>
+<li>Scene scale normalization</li>
+<li><strong>Parameters</strong> (passed via <code>inference()</code> method directly):</li>
+<li><code>conf_thresh_percentile</code> (float, default: 40.0): Lower percentile for adaptive confidence threshold. Points below this confidence percentile will be filtered out.</li>
+<li><code>num_max_points</code> (int, default: 1,000,000): Maximum number of points in the exported point cloud. If exceeded, points will be downsampled.</li>
+<li><code>show_cameras</code> (bool, default: True): Whether to include camera wireframes in the exported GLB file for visualization.</li>
+</ul>
+<h3 id="gs_ply">✨ <code>gs_ply</code><a class="headerlink" href="#gs_ply" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: Gaussian Splatting point cloud format</li>
+<li><strong>Contents</strong>: 3DGS data in PLY format. Compatible with standard 3DGS viewers such as <a href="https://superspl.at/editor">SuperSplat</a> (recommended), <a href="https://sparkjs.dev/viewer/">SPARK</a>.</li>
+<li><strong>Use case</strong>: Gaussian Splatting reconstruction</li>
+<li><strong>Requirements</strong>: Must set <code>infer_gs=True</code> when calling <code>inference()</code>. Only supported by <code>da3-giant</code> and <code>da3nested-giant-large</code> models.</li>
+<li><strong>Additional configs</strong>, provided via <code>export_kwargs</code> (see <a href="#export-parameters">Export Parameters</a>):</li>
+<li><code>gs_views_interval</code>: Export to 3DGS every N views, default: <code>1</code>.</li>
+</ul>
+<h3 id="gs_video">🎥 <code>gs_video</code><a class="headerlink" href="#gs_video" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: Rasterized 3DGS to obtain videos</li>
+<li><strong>Contents</strong>: A video of 3DGS-rasterized views using either provided viewpoints or a predefined camera trajectory.</li>
+<li><strong>Use case</strong>: Video rendering for Gaussian Splatting</li>
+<li><strong>Requirements</strong>: Must set <code>infer_gs=True</code> when calling <code>inference()</code>. Only supported by <code>da3-giant</code> and <code>da3nested-giant-large</code> models.</li>
+<li><strong>Note</strong>: Can optionally use <code>render_exts</code>, <code>render_ixts</code>, and <code>render_hw</code> parameters in <code>inference()</code> method to specify novel viewpoints.</li>
+<li><strong>Additional configs</strong>, provided via <code>export_kwargs</code> (see <a href="#export-parameters">Export Parameters</a>):</li>
+<li><code>extrinsics</code>: Optional world-to-camera poses for novel views. Falls back to the predicted poses of input views if not provided. (Alternatively, use <code>render_exts</code> parameter in <code>inference()</code>)</li>
+<li><code>intrinsics</code>: Optional camera intrinsics for novel views. Falls back to the predicted intrinsics of input views if not provided. (Alternatively, use <code>render_ixts</code> parameter in <code>inference()</code>)</li>
+<li><code>out_image_hw</code>: Optional output resolution <code>H x W</code>. Falls back to input resolution if not provided. (Alternatively, use <code>render_hw</code> parameter in <code>inference()</code>)</li>
+<li><code>chunk_size</code>: Number of views rasterized per batch. Default: <code>8</code>.</li>
+<li><code>trj_mode</code>: Predefined camera trajectory for novel-view rendering.</li>
+<li><code>color_mode</code>: Same as <code>render_mode</code> in <a href="https://docs.gsplat.studio/main/apis/rasterization.html#gsplat.rasterization">gsplat</a>.</li>
+<li><code>vis_depth</code>: How depth is combined with RGB. Default: <code>hcat</code> (horizontal concatenation).</li>
+<li><code>enable_tqdm</code>: Whether to display a tqdm progress bar during rendering.</li>
+<li><code>output_name</code>: File name of the rendered video.</li>
+<li><code>video_quality</code>: Video quality to save. Default: <code>high</code>.<ul>
+<li><code>high</code>: High quality video (default)</li>
+<li><code>medium</code>: Medium quality video (balance of storage space and quality)</li>
+<li><code>low</code>: Low quality video (fewer storage space)</li>
+</ul>
+</li>
+</ul>
+<h3 id="feat_vis">🔍 <code>feat_vis</code><a class="headerlink" href="#feat_vis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: Feature visualization format</li>
+<li><strong>Contents</strong>: PCA-visualized intermediate features from specified layers</li>
+<li><strong>Use case</strong>: Model interpretability and feature analysis</li>
+<li><strong>Note</strong>: Requires <code>export_feat_layers</code> to be specified</li>
+<li><strong>Parameters</strong> (passed via <code>inference()</code> method directly):</li>
+<li><code>feat_vis_fps</code> (int, default: 15): Frame rate for the output video when visualizing features across multiple images.</li>
+</ul>
+<h3 id="depth_vis">🎨 <code>depth_vis</code><a class="headerlink" href="#depth_vis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Description</strong>: Depth visualization format</li>
+<li><strong>Contents</strong>: Color-coded depth maps alongside original images</li>
+<li><strong>Use case</strong>: Visual inspection of depth estimation quality</li>
+</ul>
+<h3 id="multiple-format-export">🔗 Multiple Format Export<a class="headerlink" href="#multiple-format-export" title="Permanent link">&para;</a></h3>
+<p>You can export multiple formats simultaneously by separating them with <code>-</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Export both mini_npz and glb formats</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">export_format</span> <span class="o">=</span> <span class="s2">&quot;mini_npz-glb&quot;</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Export multiple formats</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="n">export_format</span> <span class="o">=</span> <span class="s2">&quot;npz-glb-gs_ply&quot;</span>
+</span></code></pre></div>
+<h2 id="return-value">↩️ Return Value<a class="headerlink" href="#return-value" title="Permanent link">&para;</a></h2>
+<p>The <code>inference()</code> method returns a <code>Prediction</code> object with the following attributes:</p>
+<h3 id="core-outputs">📊 Core Outputs<a class="headerlink" href="#core-outputs" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>depth</strong>: <code>np.ndarray</code> - Estimated depth maps with shape <code>(N, H, W)</code> where N is the number of images, H is height, and W is width.</li>
+<li><strong>conf</strong>: <code>np.ndarray</code> - Confidence maps with shape <code>(N, H, W)</code> indicating prediction reliability (optional, depends on model).</li>
+</ul>
+<h3 id="camera-parameters">📷 Camera Parameters<a class="headerlink" href="#camera-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>extrinsics</strong>: <code>np.ndarray</code> - Camera extrinsic matrices with shape <code>(N, 3, 4)</code> representing world-to-camera transformations. Only present if camera poses were estimated or provided as input.</li>
+<li><strong>intrinsics</strong>: <code>np.ndarray</code> - Camera intrinsic matrices with shape <code>(N, 3, 3)</code> containing focal length and principal point information. Only present if poses were estimated or provided as input.</li>
+</ul>
+<h3 id="additional-outputs">🎁 Additional Outputs<a class="headerlink" href="#additional-outputs" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>processed_images</strong>: <code>np.ndarray</code> - Preprocessed input images with shape <code>(N, H, W, 3)</code> in RGB format (0-255 uint8).</li>
+<li><strong>aux</strong>: <code>dict</code> - Auxiliary outputs including:</li>
+<li><code>feat_layer_X</code>: Intermediate features from layer X (if <code>export_feat_layers</code> was specified)</li>
+<li><code>gaussians</code>: 3D Gaussian Splats data (if <code>infer_gs=True</code>)</li>
+</ul>
+<h3 id="usage-example">💻 Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;img1.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;img2.jpg&quot;</span><span class="p">])</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># Access depth maps</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">depth_maps</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">depth</span>  <span class="c1"># shape: (2, H, W)</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># Access confidence</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="s1">&#39;conf&#39;</span><span class="p">):</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="n">confidence</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">conf</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1"># Access camera parameters (if available)</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="s1">&#39;extrinsics&#39;</span><span class="p">):</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="n">camera_poses</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">extrinsics</span>  <span class="c1"># shape: (2, 4, 4)</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="s1">&#39;intrinsics&#39;</span><span class="p">):</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>    <span class="n">camera_intrinsics</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">intrinsics</span>  <span class="c1"># shape: (2, 3, 3)</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="c1"># Access intermediate features (if export_feat_layers was set)</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="s1">&#39;aux&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;feat_layer_0&#39;</span> <span class="ow">in</span> <span class="n">prediction</span><span class="o">.</span><span class="n">aux</span><span class="p">:</span>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>    <span class="n">features</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;feat_layer_0&#39;</span><span class="p">]</span>
+</span></code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../CLI/" class="md-footer__link md-footer__link--prev" aria-label="Previous: DA3 CLI Reference">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                DA3 CLI Reference
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../BENCHMARK/" class="md-footer__link md-footer__link--next" aria-label="Next: DA3 Benchmark">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                DA3 Benchmark
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Wong Wei Ming, Shao Ying Zhan, Dana Yak &mdash; HKUST COMP4471
+
+    </div>
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["announce.dismiss","content.code.annotate","content.code.copy","content.code.select","content.footnote.tooltips","content.tabs.link","content.tooltips","navigation.footer","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.path","navigation.sections","navigation.top","navigation.tracking","search.highlight"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.dbc0afdc.min.js"></script>
+      
+    
+  </body>
+</html>

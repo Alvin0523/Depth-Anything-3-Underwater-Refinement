@@ -26,7 +26,8 @@
     to efficiently fine-tune DA3 on the MIMIR-UW @alvarez2023mimir underwater synthetic dataset
     (rendered in Unreal Engine 4 with AirSim, in the context of pipeline inspection)
     without catastrophic forgetting. We apply rank-8 LoRA to attention blocks
-    of the DINOv2-L backbone, adapting approximately 1% of total parameters.
+    of the DINOv2-L backbone, adapting approximately 9.24% of total parameters
+    (LoRA matrices ~1% + fully trainable DPT prediction head ~8.24%).
     Physics-aware preprocessing — gray world white balance and percentile
     histogram stretching — corrects domain-specific degradation at load time.
     Trained on the SeaFloor Algae environment (9,987 synchronized RGB-depth pairs
@@ -52,7 +53,7 @@ Collecting large-scale real underwater RGB-depth pairs for supervised retraining
 This work presents a LoRA-based fine-tuning pipeline for DA3 on the MIMIR-UW synthetic underwater dataset. Physics-aware preprocessing corrects underwater color degradation before the model forward pass, aligning the input distribution with pretrained backbone expectations. The main contributions are:
 
 - *Physics-aware preprocessing:* Gray world white balance and percentile histogram stretching applied at load time to compensate for wavelength-dependent attenuation and contrast degradation.
-- *LoRA adaptation:* Rank-8 LoRA decomposition applied to all DINOv2-L attention projection layers (query, key, value, output), updating approximately 1% of total parameters (\~3M of \~300M) while preserving pretrained representations.
+- *LoRA adaptation:* Rank-8 LoRA decomposition applied to all DINOv2-L attention projection layers (query, key, value, output), updating approximately 9.24% of total parameters (~3M LoRA matrices + fully trainable DPT head) while preserving pretrained representations.
 - *Combined depth loss:* Scale-Invariant Log loss paired with a Sobel-based edge gradient term for metric depth supervision on underwater scenes.
 
 = Related Work <sec:related>
@@ -75,7 +76,7 @@ MIMIR-UW is a synthetic underwater dataset rendered in Unreal Engine 4 with expl
 
 For this work, we focus on the *SeaFloor Algae* environment (9,987 frames, ~25% of the full dataset), which presents a challenging mid-complexity scenario with shallow visibility, dynamic algae occlusions, and high texture complexity. This environment demands robust depth discrimination without the confounding factors of extreme darkness or extreme depth, making it a representative single-environment baseline. We reserve exploration of the remaining environments (SeaFloor, OceanFloor, SandPipe) for future multi-environment training runs.
 
-The SeaFloor Algae subset is split 80/20 into training (7,990 samples) and validation (1,997 samples) using a fixed random seed of 42. RGB images are 8-bit PNGs at approximately 1280×720 resolution; depth ground truth is stored as float32 arrays in metres. All images are resized to 518×518 during training, satisfying the ViT patch tokenizer's requirement that spatial dimensions be a multiple of 14. Depths are clipped to [0,~10]~m to cover the typical operational range of underwater AUVs.
+The SeaFloor Algae subset is split 80/20 into training (7,990 samples) and validation (1,997 samples) using a fixed random seed of 42. RGB images are 8-bit PNGs at approximately 1280×720 resolution; depth ground truth is stored as float32 inverse-depth arrays (1/metres) per the MIMIR-UW format and inverted at load time; background pixels encoded as $~6 times 10^(-5)$ map to depths $>10^4$~m and are zeroed by the 10~m cutoff. All images are resized to 518×518 during training, satisfying the ViT patch tokenizer's requirement that spatial dimensions be a multiple of 14. Depths are clipped to [0,~10]~m to cover the typical operational range of underwater AUVs.
 
 == Preprocessing Pipeline
 
@@ -91,17 +92,21 @@ Images are finally normalized with ImageNet statistics (mean [0.485, 0.456, 0.40
 
 We apply Low-Rank Adaptation (LoRA) @hu2021lora to all attention projection layers (query, key, value, output) in the DINOv2-L backbone. For each target weight matrix $W in RR^(m times n)$, we introduce a low-rank decomposition $Delta W = B A$ where $B in RR^(m times r)$, $A in RR^(r times n)$, and $r = 8$. The effective weight during the forward pass is $W + (alpha / r) B A$ with scaling parameter $alpha = 16$ (i.e., scaling factor of 2), following standard practice to match the LoRA contribution magnitude across different rank choices.
 
-The backbone encoder is otherwise frozen. Only the LoRA matrices ($approx$ 3M parameters, ~1% of the 300M DINOv2-L total) and the DPT prediction head are updated. This preserves pretrained feature representations while enabling efficient adaptation to the underwater domain.
+The backbone encoder is otherwise frozen. Only the LoRA matrices ($approx$~3M parameters, ~1% of the 300M DINOv2-L total) and the fully trainable DPT prediction head are updated, giving ~9.24% trainable parameters in total. This preserves pretrained feature representations while enabling efficient adaptation to the underwater domain.
 
 == Training Configuration
 
-Training uses AdamW with an initial learning rate of $2 times 10^(-5)$, weight decay $1 times 10^(-4)$, and batch size 16. An initial value of $1 times 10^(-4)$ caused scale drift in the SILog loss; reducing to $2 times 10^(-5)$ yielded stable convergence. The learning rate follows cosine annealing to a floor of $1 times 10^(-6)$ over 30 epochs, with gradient norms clipped at 1.0 to prevent single-batch weight explosions.
+Training uses AdamW with an initial learning rate of $2 times 10^(-5)$, weight decay $1 times 10^(-4)$, and batch size 16. An initial value of $1 times 10^(-4)$ caused AbsRel to diverge: the variance-focus term in SILog was cancelling the global scale penalty, allowing the model to learn arbitrary scale offsets. Two fixes were applied together: adding the scale anchor term ($0.1 |overline(g)|$) to SILog, and reducing the learning rate to $2 times 10^(-5)$. This yielded stable convergence. The learning rate follows cosine annealing to a floor of $1 times 10^(-6)$ over 30 epochs, with gradient norms clipped at 1.0 to prevent single-batch weight explosions.
 
 The training objective combines Scale-Invariant Log loss (SILog) @eigen2014depth and a Sobel-based edge gradient loss:
 
 $ cal(L) = cal(L)_"SILog" + 0.5 dot cal(L)_"grad" $
 
-SILog penalizes depth errors in log space, providing scale-invariant supervision. The gradient loss compares Sobel-filtered predicted and ground-truth depth maps to enforce edge sharpness. All experiments run on a single NVIDIA A100 40GB GPU on the NSCC HPC cluster with a 12-hour walltime budget.
+where the full SILog term is:
+
+$ cal(L)_"SILog" = overline(g^2) - 0.85 overline(g)^2 + 0.1 |overline(g)| $
+
+with $g_i = log hat(d)_i - log d_i$ and $overline(g)$ denoting the mean log-ratio. The third term is a scale anchor penalty (weight 0.1) that prevents the variance-focus term from cancelling the global scale offset — without it, AbsRel diverges while SILog stays low. The gradient loss compares Sobel-filtered predicted and ground-truth depth maps to enforce edge sharpness. All experiments run on a single NVIDIA A100 40GB GPU on the NSCC HPC cluster with a 12-hour walltime budget.
 
 == Evaluation Metrics
 
@@ -167,10 +172,10 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
   grid(
     columns: 2,
     gutter: 4pt,
-    image("01_train_val_loss.png", width: 100%),
-    image("02_absrel.png", width: 100%),
-    image("03_rmse.png", width: 100%),
-    image("04_delta1.png", width: 100%),
+    image("../media/01_train_val_loss.png", width: 100%),
+    image("../media/02_absrel.png", width: 100%),
+    image("../media/03_rmse.png", width: 100%),
+    image("../media/04_delta1.png", width: 100%),
   )
 ) <fig:training>
 
@@ -184,11 +189,11 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
   grid(
     columns: 1,
     gutter: 1pt,
-    image("qual_baseline_0000.png", width: 100%),
-    image("qual_finetuned_0000.png", width: 100%),
+    image("../media/qual_baseline_0000.png", width: 100%),
+    image("../media/qual_finetuned_0000.png", width: 100%),
     v(4pt),
-    image("qual_baseline_0005.png", width: 100%),
-    image("qual_finetuned_0005.png", width: 100%),
+    image("../media/qual_baseline_0005.png", width: 100%),
+    image("../media/qual_finetuned_0005.png", width: 100%),
   )
 ) <fig:qualitative>
 
@@ -209,11 +214,11 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
   grid(
     columns: 2,
     gutter: 4pt,
-    image("06_step_loss.png", width: 100%),
-    image("09_absrel_vs_delta1.png", width: 100%),
-    image("07_silog.png", width: 100%),
-    image("05_lr.png", width: 100%),
-    grid.cell(colspan: 2, image("08_grad_loss.png", width: 100%)),
+    image("../media/06_step_loss.png", width: 100%),
+    image("../media/09_absrel_vs_delta1.png", width: 100%),
+    image("../media/07_silog.png", width: 100%),
+    image("../media/05_lr.png", width: 100%),
+    grid.cell(colspan: 2, image("../media/08_grad_loss.png", width: 100%)),
   )
 ) <fig:step_losses>
 
@@ -226,13 +231,13 @@ Training was executed on the NSCC HPC cluster (1× NVIDIA A100 40~GB, 16 CPU cor
 #figure(
   caption: [Localisation system running in a pool environment under ROS 2 Jazzy. *Left:* Camera feed with YOLOv11-seg detections and per-object depth estimates (e.g., Yellow-flare at 1.3~m). *Right:* Foxglove 3D panel showing SQ-UKF tracks (T0–T5) alongside ground-truth TF frames (suffixed `_gt`) for gate, flares, and buckets. Tracks appear close to ground truth, confirming metric localisation accuracy.],
   placement: top,
-  image("localisation_demo.png", width: 100%),
+  image("../media/localisation_demo.png", width: 100%),
 ) <fig:localisation>
 
 The fine-tuned DA3 model serves as the metric depth backend of a ROS 2 Jazzy localisation pipeline for AUV competitions (SAUVC @sauvc, RoboSub, RoboTX @robonation), where the vehicle must autonomously detect and approach submerged objects — gates, flares, and buckets — using a single monocular camera. DA3 depth maps are fused with YOLOv11-seg @yolo instance masks in a depth–segmentation fusion node: for each detected object, valid depth pixels within its segmentation mask are aggregated using a configurable statistic (mean, median, or percentile) to produce a per-object metric distance estimate. These estimates feed a Square-Root Unscented Kalman Filter (SQ-UKF) tracker that maintains temporally persistent object tracks in the map frame via Hungarian-algorithm data association, publishing confirmed track poses as TF frames for downstream navigation. Improved depth accuracy from LoRA fine-tuning (AbsRel 0.099) translates directly to tighter 3D position estimates and more stable track initialisation compared to the zero-shot DA3 baseline.
 
 = Conclusion <sec:conclusion>
 
-This work presents a parameter-efficient domain adaptation pipeline for underwater monocular metric depth estimation by applying rank-8 LoRA fine-tuning of DINOv2-L attention layers combined with physics-aware preprocessing (gray world white balance and percentile histogram stretching). The approach adapts a terrestrial depth foundation model to the underwater domain while updating only ~1% of parameters. Training on the SeaFloor Algae environment from MIMIR-UW for 30 epochs on a single A100 GPU achieves AbsRel~=~0.099, RMSE~=~0.739~m, and δ\<1.25~=~91.0% on the held-out validation set, substantially surpassing the 0.15–0.20 initial target. The combined SILog and Sobel gradient objective provides stable, scale-correct convergence without conflicting gradient signals.
+This work presents a parameter-efficient domain adaptation pipeline for underwater monocular metric depth estimation by applying rank-8 LoRA fine-tuning of DINOv2-L attention layers combined with physics-aware preprocessing (gray world white balance and percentile histogram stretching). The approach adapts a terrestrial depth foundation model to the underwater domain while updating ~9.24% of parameters (LoRA matrices + DPT head). Training on the SeaFloor Algae environment from MIMIR-UW for 30 epochs on a single A100 GPU achieves AbsRel~=~0.099, RMSE~=~0.739~m, and δ\<1.25~=~91.0% on the held-out validation set, substantially surpassing the 0.15–0.20 initial target. The combined SILog and Sobel gradient objective provides stable, scale-correct convergence without conflicting gradient signals.
 
 Future work includes: (1) multi-environment training across the remaining MIMIR-UW environments (OceanFloor, SandPipe) to improve generalisation to deep-water and sand-occluded scenes; (2) evaluation of the pretrained DA3 baseline on the SeaFloor Algae validation split to quantify in-distribution improvement; (3) validation on real underwater AUV footage to characterise the sim-to-real transfer gap; (4) extension to multi-view DA3 for rigs with multiple synchronised cameras; and (5) knowledge distillation of the LoRA-adapted model for edge deployment on embedded AUV hardware.
