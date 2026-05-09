@@ -131,7 +131,7 @@ Three standard depth metrics are computed on the validation set after each epoch
 
 == Implementation Details
 
-The base model (DA3 Mono Metric Large) is loaded from HuggingFace (`depth-anything/da3metric-large`) via a gated access token. LoRA matrices are injected by a custom wrapper that replaces target `nn.Linear` layers and registers $A$ and $B$ as trainable parameters while freezing the original weight. Checkpoints store model state, optimizer state, current epoch, and best validation metric to support job resumption on the HPC cluster. The environment is managed with Pixi using PyTorch 2.x and xformers for memory-efficient attention.
+The base model (DA3 Mono Metric Large) is loaded from HuggingFace (`depth-anything/da3metric-large`) via a gated access token. LoRA matrices are injected by a custom wrapper that replaces target `nn.Linear` layers and registers $A$ and $B$ as trainable parameters while freezing the original weight. Checkpoints store model state, optimizer state, current epoch, and best validation metric to support job resumption on the HPC cluster. The environment is managed with Pixi using PyTorch 2.x and xformers for memory-efficient attention. The full training pipeline, preprocessing code, and evaluation scripts are available at #link("https://github.com/Alvin0523/Depth-Anything-3-Underwater-Refinement")[github.com/Alvin0523/Depth-Anything-3-Underwater-Refinement].
 
 == Visualization
 
